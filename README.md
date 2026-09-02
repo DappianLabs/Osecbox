@@ -14,20 +14,37 @@ Security engagements often fragment across terminals, flags, output files, liste
 
 ## What is OsecBox?
 
-OsecBox is an Electron desktop application for managing authorized penetration-testing workflows. It combines guided tool launchers with live terminal sessions and keeps scan output, findings, listeners, tunnels, and saved workspaces connected as an engagement progresses.
+OsecBox is an Electron desktop application for managing authorized penetration-testing workflows. It combines guided tool launchers with live terminal sessions and keeps scan output, findings, listeners, tunnels, AI context, and saved workspaces connected as an engagement progresses.
 
 It is not a replacement for the underlying security tools. It is the workspace that makes their command, output, and session context easier to manage.
 
 ## What it does
 
-| From one workspace | What it helps you do |
-| --- | --- |
-| **Recon & scanning** | Configure and run Nmap, Nikto, Nuclei, and directory-scanning workflows; review live terminal output alongside parsed results. |
-| **AI-assisted analysis** | Send captured command and output context to a configured AI provider for explanations and next-step guidance. |
-| **Metasploit workflows** | Work with Metasploit console sessions, handlers, modules, jobs, and session state in the desktop app. |
-| **Listeners & pivots** | Manage listeners, reverse-shell workflows, SSH tunnels, port forwarding, and pivoting sessions without losing their owning terminal. |
-| **Engagement continuity** | Use multiple terminals, save and load workspace sessions, schedule supported scans, and review recorded activity. |
-| **Attack-surface context** | Enumerate subdomains and generate a network topology from active scan and infrastructure data. |
+### Discover and analyze
+
+- Launch **Nmap**, **Nikto**, **Nuclei**, and directory-scanning workflows from one Console workspace.
+- Review live terminal output beside parser-supported scan results, ports, findings, and hits.
+- Run subdomain enumeration with supported tools including **Subfinder**, **Amass**, **Assetfinder**, **Sublist3r**, and **ffuf** when they are available in your configured runtime.
+- Build a **network topology** from active scan results and current listeners, tunnels, and connections; export it as JSON or PNG.
+
+### Keep the engagement together
+
+- Open and work across **multiple terminal sessions** without leaving the app.
+- Manage **Metasploit** console, handler, module, job, and session workflows.
+- Configure listeners, reverse-shell workflows, **SSH tunnels**, **chisel**, proxy chains, and port forwarding with their associated terminal context.
+- Use **Automate** for target lists and scan presets, and use the timeline/scheduler for supported scan workflows.
+
+### Save the work, not just the output
+
+- Use **Save** to preserve the current workspace session.
+- Use **Load** to return to a saved workspace and continue the engagement where you left it.
+- Keep the tools, terminals, findings, infrastructure state, and working context connected instead of reconstructing them across separate windows.
+
+### Use AI your way
+
+- Ask the **AI Assistant** to analyze captured scan and terminal context, explain findings, and suggest a next command for review.
+- Configure the provider that fits your environment: **Groq**, **Cloudflare Workers AI**, **OpenRouter Free**, OpenAI, Anthropic, Google, Mistral, or a custom endpoint.
+- Free-tier options are available through supported providers, subject to each provider’s account requirements, availability, and limits. OsecBox never replaces operator judgment: review every suggestion before acting on it.
 
 ## Core workflow
 
@@ -35,7 +52,7 @@ It is not a replacement for the underlying security tools. It is the workspace t
 2. **Keep the evidence attached.** Each run has its own tab and terminal context, with parser-supported results kept beside the raw output.
 3. **Understand the result.** Use the optional AI Assistant with your configured provider to analyze the captured context and suggest a next command for review.
 4. **Continue the engagement.** Move into Metasploit, listener, and tunneling workflows while OsecBox retains the terminals and state that support them.
-5. **Preserve the picture.** Save the workspace, use batch and scheduled scan workflows where appropriate, and build a topology from active scan and infrastructure data.
+5. **Save, return, and extend.** Save the workspace, load it when work resumes, use batch or scheduled scan workflows where appropriate, and build a topology from active scan and infrastructure data.
 
 ## Key capabilities
 
@@ -47,7 +64,7 @@ Nmap configuration, live output, and parsed port/finding views belong to the sam
 
 ### AI that starts with the work you just did
 
-The AI Assistant can use the command and terminal/output context OsecBox has captured. It requires a provider and API credentials configured by the user; review every suggested command and conclusion before acting on it.
+The AI Assistant can use the command and terminal/output context OsecBox has captured. Choose from supported provider presets—including free-tier options—or configure a custom endpoint. Review every suggested command and conclusion before acting on it.
 
 ![OsecBox AI panel explaining Nuclei findings with contextual next-step guidance](client/public/images/readme/ai-nuclei.webp)
 
@@ -57,7 +74,7 @@ OsecBox surfaces Metasploit console and handler workflows alongside listener and
 
 | Metasploit workspace | Listener and tunnel management |
 | --- | --- |
-| ![OsecBox Metasploit console and module state](client/public/images/readme/msf-console.webp) | ![OsecBox listener management showing active sessions](client/public/images/readme/listeners-tunnel.webp) |
+| ![OsecBox Metasploit console and module state](client/public/images/readme/msf-console.webp) | ![OsecBox listener and tunnel configuration](client/public/images/readme/listeners-tunnel.webp) |
 
 ### Pivoting with visible configuration
 
@@ -65,10 +82,10 @@ Configure SSH tunnels, chisel, proxy chains, and port-forwarding workflows from 
 
 ## Why OsecBox
 
-- **One engagement workspace.** Keep targets, commands, raw output, parsed results, terminals, listeners, and tunnels together instead of spread across windows.
+- **One engagement workspace.** Keep targets, commands, raw output, parsed results, terminals, listeners, tunnels, and saved sessions together instead of spread across windows.
 - **Tool context, not a fake abstraction.** OsecBox works with real tool runtimes and displays their live output. It does not conceal what is being run.
-- **A practical handoff between stages.** Scan data and active infrastructure can feed the topology view; sessions can be saved and loaded when work resumes.
-- **Optional AI assistance with visible context.** AI features are user-configured and complement—not replace—operator judgment or authorization.
+- **A practical handoff between stages.** Scan data and active infrastructure can feed the topology view; Save and Load let you resume the workspace later.
+- **AI choice, not lock-in.** Use supported free-tier provider options, another supported provider, or a custom endpoint that meets your needs.
 
 ## Product tour
 
@@ -82,9 +99,9 @@ Use **Automate** to enter or import a target list, apply a scan preset across th
 
 The **Topology** view can generate a network map from active scan results and active listeners, tunnels, and connections. You can also draw a custom diagram and export it as JSON or PNG.
 
-### 3. Resume with the whole workspace
+### 3. Save and resume the workspace
 
-Use **Save** and **Load** to preserve the working session. OsecBox maintains per-user application data through Electron’s normal user-data location; it does not require administrator access to save a workspace.
+Use **Save** and **Load** to preserve the engagement workspace. OsecBox keeps its per-user application data in Electron’s normal user-data location, so you can return to the saved working context without administrator access.
 
 ## Architecture at a glance
 
@@ -107,17 +124,6 @@ Current tagged releases are published for Windows x64 and Linux x64. macOS packa
 
 OsecBox can run without every optional security tool installed. On Windows, workflows that use Linux-native tools require a working WSL2 version-2 distribution. Review the [optional setup guide](docs/setup.md) before installing tools or running setup helpers.
 
-## Development
-
-The project targets Node.js **22.12.0**. For a local development environment:
-
-```sh
-npm ci
-npm run dev:electron
-```
-
-Run `npm run check`, `npm run check:electron`, and `npm test` for a focused local verification pass. See [development and verification](docs/development.md) for environment configuration, full checks, packaging notes, and contributor guidance.
-
 ## Security
 
 Use OsecBox only with explicit authorization. Review the target, command, credentials, and tool configuration before every security workflow.
@@ -131,7 +137,7 @@ Releases are published on [GitHub Releases](https://github.com/DappianLabs/Osecb
 ## Documentation
 
 - [Architecture](docs/architecture.md) — high-level runtime boundaries
-- [Development](docs/development.md) — local setup, verification, and packaging notes
+- [Development](docs/development.md) — contributor setup, verification, and packaging notes
 - [Optional setup](docs/setup.md) — WSL2 and security-tool setup
 - [Release guide](docs/release.md) — maintainer release process
 - [Contributing](CONTRIBUTING.md) — contribution expectations
