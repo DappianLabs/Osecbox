@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 25
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         persist-credentials: false
     
@@ -80,7 +80,7 @@ jobs:
             target: win
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         persist-credentials: false
     
