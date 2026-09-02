@@ -1,126 +1,142 @@
 # OsecBox
 
-OsecBox is a cross-platform Electron workspace for authorized security testing. It combines terminal sessions, scanners, listeners, tunneling, Metasploit workflows, result parsing, and optional AI-assisted analysis in one desktop application.
+> **An AI-assisted desktop workstation for authorized security testing that keeps recon, exploitation, terminals, listeners, pivots, and session context in one place.**
 
-The project is an Electron application first. The Express server supports the web renderer and AI API path.
+[![Version](https://img.shields.io/badge/version-1.0.2-7c3aed?style=flat-square)](https://github.com/DappianLabs/Osecbox/releases)
+[![Platforms](https://img.shields.io/badge/releases-Windows%20x64%20%7C%20Linux%20x64-2563eb?style=flat-square)](https://github.com/DappianLabs/Osecbox/releases)
+[![License](https://img.shields.io/badge/license-MIT-16a34a?style=flat-square)](LICENSE)
 
-## Technology
+![OsecBox Nmap workspace with scan configuration, live terminal output, and parsed results](client/public/images/readme/scanners-nmap.webp)
 
-- Electron, React, TypeScript, Vite, and xterm.js
-- Express, PostgreSQL/Drizzle schema tooling, and WebSocket services
-- WSL2-aware command execution on Windows with native POSIX support
-- Vitest for automated tests and GitHub Actions for CI
+Security engagements often fragment across terminals, flags, output files, listeners, and handwritten notes. OsecBox brings the tools and context together in a desktop workspace, so you can move from discovery to analysis without repeatedly rebuilding the same command, losing a terminal, or disconnecting the evidence from the action that produced it.
 
-## Repository map
+**OsecBox is for systems and data you are explicitly authorized to test.**
 
-| Path | Responsibility |
+## What is OsecBox?
+
+OsecBox is an Electron desktop application for managing authorized penetration-testing workflows. It combines guided tool launchers with live terminal sessions and keeps scan output, findings, listeners, tunnels, and saved workspaces connected as an engagement progresses.
+
+It is not a replacement for the underlying security tools. It is the workspace that makes their command, output, and session context easier to manage.
+
+## What it does
+
+| From one workspace | What it helps you do |
 | --- | --- |
-| [`client/`](client/) | React renderer, views, stores, terminal UI, scanner UI, and parsers |
-| [`electron/`](electron/) | Electron main process, preload bridge, IPC handlers, PTY and desktop services |
-| [`server/`](server/) | Express entry point, API routes, AI endpoint, and production static serving |
-| [`shared/`](shared/) | Drizzle schema and contracts shared across runtimes |
-| [`scripts/build/`](scripts/build/) | Reproducible renderer/server builds and Electron packaging helpers |
-| [`scripts/setup/`](scripts/setup/) | Optional WSL2 and security-tool installation helpers |
-| [`tests/`](tests/) | Automated Vitest coverage only |
-| [`docs/`](docs/) | Maintainer-facing architecture, development, and setup notes |
+| **Recon & scanning** | Configure and run Nmap, Nikto, Nuclei, and directory-scanning workflows; review live terminal output alongside parsed results. |
+| **AI-assisted analysis** | Send captured command and output context to a configured AI provider for explanations and next-step guidance. |
+| **Metasploit workflows** | Work with Metasploit console sessions, handlers, modules, jobs, and session state in the desktop app. |
+| **Listeners & pivots** | Manage listeners, reverse-shell workflows, SSH tunnels, port forwarding, and pivoting sessions without losing their owning terminal. |
+| **Engagement continuity** | Use multiple terminals, save and load workspace sessions, schedule supported scans, and review recorded activity. |
+| **Attack-surface context** | Enumerate subdomains and generate a network topology from active scan and infrastructure data. |
 
-Generated output, local secrets, manual experiments, release artifacts, and encrypted module bundles are intentionally excluded by [`.gitignore`](.gitignore).
+## Core workflow
 
-## Requirements
+1. **Start with a target.** Use the Console scan workflow or Sub Domain view to begin discovery with the tools available in your configured runtime.
+2. **Keep the evidence attached.** Each run has its own tab and terminal context, with parser-supported results kept beside the raw output.
+3. **Understand the result.** Use the optional AI Assistant with your configured provider to analyze the captured context and suggest a next command for review.
+4. **Continue the engagement.** Move into Metasploit, listener, and tunneling workflows while OsecBox retains the terminals and state that support them.
+5. **Preserve the picture.** Save the workspace, use batch and scheduled scan workflows where appropriate, and build a topology from active scan and infrastructure data.
 
-- Node.js 22.12.0 or newer (required by Electron Rebuild 4 and the Electron 43 toolchain)
-- npm
-- Windows 10 or newer for the Windows desktop build (Electron 43 does not support Windows 7, 8, or 8.1)
-- WSL2 with a version-2 distribution for Windows security-tool workflows
-- PostgreSQL only when database-backed features or Drizzle migrations are used
+## Key capabilities
+
+### Recon with live output and parsed findings
+
+Nmap configuration, live output, and parsed port/finding views belong to the same scan tab rather than separate tools and files.
+
+![Nmap scan configuration with clickable flags and parsed port results](client/public/images/readme/scanners-nmap.webp)
+
+### AI that starts with the work you just did
+
+The AI Assistant can use the command and terminal/output context OsecBox has captured. It requires a provider and API credentials configured by the user; review every suggested command and conclusion before acting on it.
+
+![OsecBox AI panel explaining Nuclei findings with contextual next-step guidance](client/public/images/readme/ai-nuclei.webp)
+
+### Metasploit, listeners, and session-aware infrastructure
+
+OsecBox surfaces Metasploit console and handler workflows alongside listener and tunnel management, while preserving the associated terminal context.
+
+| Metasploit workspace | Listener and tunnel management |
+| --- | --- |
+| ![OsecBox Metasploit console and module state](client/public/images/readme/msf-console.webp) | ![OsecBox listener management showing active sessions](client/public/images/readme/listeners-tunnel.webp) |
+
+### Pivoting with visible configuration
+
+Configure SSH tunnels, chisel, proxy chains, and port-forwarding workflows from the workspace, with the generated command visible for operator review before it runs.
+
+## Why OsecBox
+
+- **One engagement workspace.** Keep targets, commands, raw output, parsed results, terminals, listeners, and tunnels together instead of spread across windows.
+- **Tool context, not a fake abstraction.** OsecBox works with real tool runtimes and displays their live output. It does not conceal what is being run.
+- **A practical handoff between stages.** Scan data and active infrastructure can feed the topology view; sessions can be saved and loaded when work resumes.
+- **Optional AI assistance with visible context.** AI features are user-configured and complement—not replace—operator judgment or authorization.
+
+## Product tour
+
+### 1. Prepare a batch scan
+
+Use **Automate** to enter or import a target list, apply a scan preset across the list, and run the batch in Console mode.
+
+![OsecBox automation view with target list and scan presets](client/public/images/readme/timeline-automation.webp)
+
+### 2. Map the engagement
+
+The **Topology** view can generate a network map from active scan results and active listeners, tunnels, and connections. You can also draw a custom diagram and export it as JSON or PNG.
+
+### 3. Resume with the whole workspace
+
+Use **Save** and **Load** to preserve the working session. OsecBox maintains per-user application data through Electron’s normal user-data location; it does not require administrator access to save a workspace.
+
+## Architecture at a glance
+
+OsecBox is an Electron-first desktop application:
+
+- the **React renderer** provides the workspace and user interface;
+- the **Electron main process** manages the desktop bridge, terminal/runtime integration, and IPC boundaries;
+- the optional **Express server** supports the web renderer and AI API path.
+
+For runtime boundaries and contributor ownership details, see [the architecture guide](docs/architecture.md).
+
+## Installation
+
+Download the current release from [GitHub Releases](https://github.com/DappianLabs/Osecbox/releases):
+
+- **Windows x64:** use the NSIS installer for a normal installation, or the portable EXE for a no-install run.
+- **Linux x64:** choose the AppImage, `.deb`, or `.tar.gz` package that suits your system.
+
+Current tagged releases are published for Windows x64 and Linux x64. macOS packaging exists as future work but is not part of the current release lane.
+
+OsecBox can run without every optional security tool installed. On Windows, workflows that use Linux-native tools require a working WSL2 version-2 distribution. Review the [optional setup guide](docs/setup.md) before installing tools or running setup helpers.
 
 ## Development
 
+The project targets Node.js **22.12.0**. For a local development environment:
+
 ```sh
 npm ci
-npm run check
-npm run check:electron
-npm test
-```
-
-For a local server-backed development run, copy `.env.example` to `.env` and
-set `JWT_SECRET` to a random value of at least 32 characters. Keep `.env` local;
-it is intentionally ignored and must never be committed. Configure an AI
-provider only if you want to use the AI features. The repository targets Node.js
-`22.12.0` (see `.nvmrc`).
-
-Start the Electron development environment with:
-
-```sh
 npm run dev:electron
 ```
 
-On Windows, double-click [`start-electron.bat`](start-electron.bat) for a development launch. It checks for Node.js, installs a missing `node_modules` tree with `npm.cmd ci`, starts Vite in one terminal, and starts Electron in a second terminal. Windows PowerShell users can use `npm.cmd` when execution policy blocks the `npm` shim.
+Run `npm run check`, `npm run check:electron`, and `npm test` for a focused local verification pass. See [development and verification](docs/development.md) for environment configuration, full checks, packaging notes, and contributor guidance.
 
-The full local verification set is documented in [`docs/development.md`](docs/development.md).
+## Security
 
-## Installed app behavior
+Use OsecBox only with explicit authorization. Review the target, command, credentials, and tool configuration before every security workflow.
 
-Use the NSIS installer for normal Windows installation. It installs per user by default and keeps app data in Electron's OS-specific `userData` directory, so settings, terminal history, startup cache, and saved sessions remain writable without administrator access. Sessions created by older builds under `~/.osecbox/sessions` are copied forward on first launch.
+For vulnerability reporting and release-verification guidance, see [SECURITY.md](SECURITY.md). Do not submit secrets, target data, or unredacted command transcripts in public issues.
 
-The portable Windows build is useful for a no-install run, but it does not provide the same installed-app update path; download a newer portable build manually. The NSIS build checks GitHub Releases for updates when a release is published. Local unsigned builds can trigger Windows SmartScreen or Linux desktop trust warnings. Published Windows builds must pass Authenticode validation. Linux packages use the checksum manifest and official release channel; they are not platform-signed by this project. macOS packaging remains available as a separate future target.
+## Releases
 
-When a security tool is missing, OsecBox generates guidance for the runtime it will use. `Open in Terminal` opens an in-app terminal tab with the command ready for review; it does not silently execute package installation. Windows Linux-native tools still require a working WSL2 distribution.
-
-## Build and package
-
-```sh
-npm run build
-npm run build:electron:win
-npm run build:electron:linux
-npm run audit:package
-npm run release:checksums
-npm run release:verify-checksums -- release
-npm run release:foundation
-```
-
-Electron packaging requires `BUILD_ENCRYPTION_SECRET` in the environment or CI. It must be 64 hexadecimal characters; generate one locally with `openssl rand -hex 32` and store it in a secret manager or GitHub repository secret. Never commit `.env` files, API keys, database credentials, license secrets, plaintext backups, or generated release artifacts.
-
-`release:checksums` writes SHA-256 checksums for the generated installers, archives, and updater metadata. `release:verify-checksums -- release` verifies a generated checksum manifest before an artifact directory is shared. Checksums provide integrity comparison only; they do not prove publisher identity, source provenance, or that software is malware-free. The encryption preparation step is non-destructive: source files remain in the workspace and only generated encrypted modules are copied into the package.
-
-Build targets must run on matching operating systems because the desktop app embeds native `node-pty`: Windows packaging on Windows, Linux packaging on Linux, and macOS packaging on macOS. The CI matrix performs the cross-platform artifact checks; this Windows workstation cannot certify Linux or macOS installers.
-
-## Publishing a release
-
-The repository workflow in [`.github/workflows/release.yml`](.github/workflows/release.yml) publishes the Windows and Linux desktop targets when a version tag is pushed. Before tagging:
-
-```sh
-# update package.json and package-lock.json to the same version
-git add .
-git commit -m "release: v1.0.2"
-git push origin main
-git tag v1.0.2
-git push origin v1.0.2
-```
-
-The GitHub repository must contain a `BUILD_ENCRYPTION_SECRET` Actions secret with 64 hexadecimal characters, plus the Windows signing secrets documented in [`docs/release.md`](docs/release.md). The tag must match `package.json.version` exactly. The workflow builds on native Windows and Linux runners, audits each package, generates checksums, and creates the GitHub Release that `electron-updater` consumes. Do not upload a manually built EXE as a replacement for the tagged release metadata; keep the installer, blockmap, and `latest.yml` files from the same build together.
-
-The generated `release/` directory and Windows binaries are intentionally ignored by source control. Users should download the installer and portable EXE from the tagged GitHub Release; the workflow publishes those release assets together with their updater metadata and checksums. This keeps large generated binaries out of the source repository while still shipping the packaged app alongside the code.
-
-Published downloads use names such as `OsecBox-1.0.2-x64-Setup.exe` (Windows installer), `OsecBox-1.0.2-x64.exe` (Windows portable), `OsecBox-1.0.2-x64.AppImage`, `OsecBox-1.0.2-x64.deb`, and `OsecBox-1.0.2-x64.tar.gz` (Linux). Users select the matching file under the GitHub Release **Assets** section and verify `SHA256SUMS.txt` before running it.
-
-For a published release, the workflow requires `WINDOWS_CSC_LINK`/`WINDOWS_CSC_KEY_PASSWORD`. Windows EXEs must pass Authenticode validation before publication. Linux packages are not platform-signed by this project; their release checksums protect against accidental or in-transit changes when the manifest is obtained from the official release. Local development builds may remain unsigned. The macOS secrets are not required by the current release lane.
-
-No release process can honestly prove that an artifact is malware-free. Users should download only from the tagged GitHub Release, verify the checksum manifest, confirm the platform signature where applicable, and scan the downloaded files with their normal endpoint-security tools. See [`SECURITY.md`](SECURITY.md) for vulnerability reporting.
+Releases are published on [GitHub Releases](https://github.com/DappianLabs/Osecbox/releases). Current releases cover Windows x64 and Linux x64. Maintainer-only signing, packaging, checksum, and release procedures are intentionally kept in [the release guide](docs/release.md), not in this product overview.
 
 ## Documentation
 
-- [`docs/architecture.md`](docs/architecture.md) — runtime boundaries and important ownership rules
-- [`docs/development.md`](docs/development.md) — development and verification commands
-- [`docs/release.md`](docs/release.md) — maintainer preflight, signing, GitHub setup, and clean-machine acceptance
-- [`docs/setup.md`](docs/setup.md) — optional WSL2 and tool setup
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution expectations
-- [`SECURITY.md`](SECURITY.md) — authorization and vulnerability-reporting guidance
-
-## Authorization
-
-Use OsecBox only against systems and data for which you have explicit authorization. Review command, target, credential, and tool configuration before running security workflows.
+- [Architecture](docs/architecture.md) — high-level runtime boundaries
+- [Development](docs/development.md) — local setup, verification, and packaging notes
+- [Optional setup](docs/setup.md) — WSL2 and security-tool setup
+- [Release guide](docs/release.md) — maintainer release process
+- [Contributing](CONTRIBUTING.md) — contribution expectations
+- [Security policy](SECURITY.md) — reporting and release-safety guidance
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE).
+[MIT](LICENSE) © OsecBox contributors.
