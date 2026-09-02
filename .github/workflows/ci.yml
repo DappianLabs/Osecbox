@@ -1,0 +1,129 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.12.0'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    - name: Release foundation preflight
+      run: npm run release:foundation -- --ci
+
+
+    - name: Dependency audit
+      run: npm run audit:dependencies
+
+    - name: Platform compatibility audit
+      run: npm run audit:platform
+    
+    - name: Type check
+      run: npm run check
+
+    - name: Type check Electron
+      run: npm run check:electron
+
+    - name: Electron runtime and native PTY smoke test
+      run: npm run test:electron-runtime
+
+    - name: Unit tests with coverage
+      run: npm run test:coverage
+    
+    - name: Build
+      run: npm run build
+      env:
+        DATABASE_URL: postgresql://test:test@localhost:5432/test
+
+  build-electron:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    needs: test
+    # Do not expose the build secret to untrusted fork PRs. Pull requests run
+    # the complete test/type/runtime audit above. Encrypted build artifacts are
+    # produced only from the trusted main branch; release signing is enforced
+    # separately by the tagged release workflow.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      BUILD_ENCRYPTION_SECRET: ${{ secrets.BUILD_ENCRYPTION_SECRET }}
+    
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: windows-latest
+            target: win
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.12.0'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Verify build encryption secret is configured
+      run: node -e "if (!/^[a-fA-F0-9]{64}$/.test(process.env.BUILD_ENCRYPTION_SECRET || '')) { console.error('BUILD_ENCRYPTION_SECRET must be a 64-character hexadecimal CI secret'); process.exit(1); }"
+
+    - name: Platform compatibility audit
+      run: npm run audit:platform
+
+    - name: Electron runtime and native PTY smoke test
+      run: npm run test:electron-runtime
+
+    - name: Build Electron (Linux)
+      if: matrix.target == 'linux'
+      run: npm run build:electron:linux -- --publish never
+    
+    - name: Build Electron (Windows)
+      if: matrix.target == 'win'
+      run: npm run build:electron:win -- --publish never
+
+
+    - name: Audit packaged artifact
+      run: node scripts/diagnostics/packaged-artifact-audit.cjs --target=${{ matrix.target }}
+
+    - name: Generate release checksums
+      run: npm run release:checksums
+
+    - name: Verify release checksums
+      run: npm run release:verify-checksums -- release
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: electron-${{ matrix.os }}
+        path: release/
+        if-no-files-found: error
+        retention-days: 14

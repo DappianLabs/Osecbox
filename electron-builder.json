@@ -1,0 +1,110 @@
+{
+  "appId": "com.offsecbox.app",
+  "productName": "OsecBox",
+  "icon": "icon",
+  "directories": {
+    "output": "release",
+    "buildResources": "build"
+  },
+  "compression": "maximum",
+  "npmRebuild": false,
+  "afterPack": "scripts/build/after-pack.cjs",
+  "asar": true,
+  "asarUnpack": [
+    "**/*.node",
+    "**/node_modules/node-pty/prebuilds/**/*"
+  ],
+  "files": [
+    "dist/**/*",
+    "package.json",
+    "!dist/**/*.map",
+    "node_modules/node-pty/package.json",
+    "node_modules/node-pty/lib/**/*",
+    "node_modules/node-pty/build/Release/**/*",
+    "node_modules/node-pty/prebuilds/**/*",
+    "!node_modules/node-pty/**/*.map",
+    "!node_modules/**/*.map",
+    "!node_modules/node-pty/build/Release/**/*.pdb",
+    "!node_modules/node-pty/lib/**/*.test.js",
+    "!node_modules/node-pty/src/**/*",
+    "!node_modules/node-pty/scripts/**/*",
+    "!node_modules/node-pty/deps/**/*",
+    "!node_modules/node-pty/third_party/**/*",
+    "!node_modules/node-pty/typings/**/*",
+    "!node_modules/node-pty/binding.gyp",
+    "!node_modules/node-pty/README.md",
+    "!node_modules/node-pty/LICENSE"
+  ],
+  "extraResources": [
+    {
+      "from": "encrypted-modules",
+      "to": "encrypted-modules",
+      "filter": ["**/*"]
+    }
+  ],
+  "publish": {
+    "provider": "github",
+    "owner": "DappianLabs",
+    "repo": "Osecbox"
+  },
+  "win": {
+    "target": ["nsis", "portable"],
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "verifyUpdateCodeSignature": true
+  },
+  "nsis": {
+    "artifactName": "${productName}-${version}-${arch}-Setup.${ext}",
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "perMachine": false,
+    "allowElevation": true
+  },
+  "linux": {
+    "target": ["AppImage", "deb", "tar.gz"],
+    "category": "Network",
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "desktop": {
+      "entry": {
+        "Name": "OsecBox",
+        "Comment": "Penetration Testing IDE",
+        "Categories": "Network;Security;Development;"
+      }
+    },
+    "executableName": "osecbox"
+  },
+  "deb": {
+    "depends": [
+      "libgtk-3-0",
+      "libnotify4",
+      "libnss3",
+      "libxss1",
+      "libxtst6",
+      "xdg-utils",
+      "libatspi2.0-0",
+      "libuuid1"
+    ],
+    "recommends": ["libappindicator3-1"]
+  },
+  "mac": {
+    "category": "public.app-category.developer-tools",
+    "hardenedRuntime": true,
+    "gatekeeperAssess": true,
+    "target": ["dmg", "zip"]
+  },
+  "dmg": {
+    "contents": [
+      {
+        "x": 130,
+        "y": 220
+      },
+      {
+        "x": 410,
+        "y": 220,
+        "type": "link",
+        "path": "/Applications"
+      }
+    ]
+  }
+}

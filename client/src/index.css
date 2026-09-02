@@ -1,0 +1,1029 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: 'Segoe UI', 'Inter', sans-serif;
+  --font-mono: 'Consolas', 'JetBrains Mono', monospace;
+
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+}
+
+:root {
+  /* LIGHT MODE - warm neutral surface, with enough separation between panes */
+  --background: 38 24% 90%;
+  --foreground: 222 24% 14%;
+  
+  --card: 38 28% 94%;
+  --card-foreground: 222 24% 14%;
+  
+  --popover: 38 30% 96%;
+  --popover-foreground: 222 24% 14%;
+  
+  --primary: 210 90% 46%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 38 20% 84%;
+  --secondary-foreground: 222 24% 14%;
+  
+  --muted: 38 18% 84%;
+  --muted-foreground: 220 15% 36%;
+  
+  --accent: 205 34% 89%;
+  --accent-foreground: 222 24% 12%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 93%;
+  
+  --border: 34 18% 72%;
+  --input: 38 30% 96%;
+  --ring: 210 90% 46%;
+  
+  --radius: 0.375rem;
+
+  /* Interaction timing: fast enough for direct manipulation, long enough to
+     communicate state changes without making the app feel sluggish. */
+  --motion-fast: 150ms;
+  --motion-panel: 220ms;
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  
+  /* Shared bevel tokens for scanner and navigation controls. */
+  --control-face: 38 26% 94%;
+  --control-face-strong: 38 24% 90%;
+  --control-hover: 38 28% 96%;
+  --control-hover-strong: 38 25% 92%;
+  --control-border: 34 16% 60%;
+  --control-highlight: 0 0% 100%;
+  --control-shadow: 34 18% 50%;
+  --control-text: 222 24% 14%;
+
+  /* Sidebar - warm Aero surface */
+  --sidebar: 35 26% 86%;
+  --sidebar-foreground: 222 24% 18%;
+  --sidebar-primary: 210 90% 46%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 35 24% 80%;
+  --sidebar-accent-foreground: 222 24% 12%;
+  --sidebar-border: 34 18% 70%;
+  --sidebar-ring: 210 90% 46%;
+}
+
+.dark {
+  /* DARK MODE - high contrast without flattening the surfaces */
+  --background: 240 6% 10%;
+  --foreground: 240 5% 96%;
+  
+  --card: 240 5% 15%;
+  --card-foreground: 240 5% 96%;
+  
+  --popover: 240 5% 15%;
+  --popover-foreground: 240 5% 96%;
+  
+  --primary: 210 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 240 5% 21%;
+  --secondary-foreground: 240 5% 96%;
+  
+  --muted: 240 5% 21%;
+  --muted-foreground: 240 5% 76%;
+  
+  --accent: 210 18% 24%;
+  --accent-foreground: 240 5% 96%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 240 4% 29%;
+  --input: 240 5% 18%;
+  --ring: 210 100% 50%;
+  
+  --motion-fast: 150ms;
+  --motion-panel: 220ms;
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --control-face: 240 5% 26%;
+  --control-face-strong: 240 5% 23%;
+  --control-hover: 240 5% 29%;
+  --control-hover-strong: 240 5% 25%;
+  --control-border: 240 4% 38%;
+  --control-highlight: 0 0% 100%;
+  --control-shadow: 240 8% 5%;
+  --control-text: 240 5% 96%;
+
+  --sidebar: 240 6% 13%;
+  --sidebar-foreground: 240 5% 94%;
+  --sidebar-primary: 210 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 5% 22%;
+  --sidebar-accent-foreground: 240 5% 96%;
+  --sidebar-border: 240 5% 20%;
+  --sidebar-ring: 210 100% 50%;
+}
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    font-size: 16px; /* Base font size */
+    scroll-behavior: smooth;
+    height: 100%;
+    overflow: hidden; /* The IDE owns scrolling inside its panes. */
+    /* Improve touch responsiveness on mobile */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* Keep loading states honest: a loading surface must not pretend to be ready. */
+  body {
+    cursor: default !important;
+    pointer-events: auto !important;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .loading-cursor,
+  [data-loading="true"] {
+    cursor: wait;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  :where(button, [role="button"], a, input, select, textarea):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  :where(button, [role="button"]) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :where(button:not(:disabled), [role="button"]:not([aria-disabled="true"])) {
+    transition:
+      transform var(--motion-fast) var(--motion-ease-out),
+      color var(--motion-fast) var(--motion-ease-out),
+      background-color var(--motion-fast) var(--motion-ease-out),
+      border-color var(--motion-fast) var(--motion-ease-out),
+      box-shadow var(--motion-fast) var(--motion-ease-out),
+      opacity var(--motion-fast) var(--motion-ease-out);
+  }
+
+  :where(button:not(:disabled), [role="button"]:not([aria-disabled="true"])):active {
+    transform: scale(0.985);
+    transition-duration: 70ms;
+  }
+  
+  /* ✅ RESPONSIVE: Scale font size based on WINDOW width (not screen) for Electron */
+  /* This works for both browser and Electron since it's based on viewport */
+  @media (min-width: 1920px) {
+    html {
+      font-size: 17px; /* Slightly larger on wide windows */
+    }
+  }
+  
+  @media (min-width: 2560px) {
+    html {
+      font-size: 18px; /* Even larger on ultra-wide windows */
+    }
+  }
+  
+  @media (max-width: 1366px) {
+    html {
+      font-size: 15px; /* Slightly smaller on narrow windows */
+    }
+  }
+  
+  @media (max-width: 1280px) {
+    html {
+      font-size: 14px; /* Smaller on small windows */
+    }
+  }
+  
+  @media (max-width: 1024px) {
+    html {
+      font-size: 13px; /* Even smaller on minimum window size */
+    }
+  }
+  
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    overflow: hidden;
+    /* ✅ INTERACTIVITY FIX: Ensure immediate interactivity */
+    cursor: default !important;
+    pointer-events: auto !important;
+  }
+  
+  /* Ensure proper scaling on all screen sizes */
+  #root {
+    @apply h-screen w-full min-h-0;
+    overflow: hidden;
+    /* Keep the root compositing-neutral; forcing a layer here makes every
+       view repaint together and can make terminal resizing feel heavier. */
+    pointer-events: auto !important;
+  }
+}
+
+/* Smooth Animations for All Interactive Elements */
+@layer utilities {
+  /* ✅ INTERACTIVITY FIX: Immediate interaction utilities */
+  .interactive-ready {
+    cursor: default !important;
+    pointer-events: auto !important;
+    user-select: auto !important;
+    -webkit-user-select: auto !important;
+  }
+  
+  /* ✅ INTERACTIVITY FIX: Prevent hydration delays */
+  .hydration-optimized {
+    pointer-events: auto !important;
+  }
+  
+  /* ✅ SMOOTH SCROLLING: Custom utility class */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Shared interaction language for every Button primitive. Keep feedback
+     quick and tactile without moving surrounding layout. */
+  .ui-button {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    transition:
+      transform var(--motion-fast) var(--motion-ease-out),
+      color var(--motion-fast) var(--motion-ease-out),
+      background-color var(--motion-fast) var(--motion-ease-out),
+      border-color var(--motion-fast) var(--motion-ease-out),
+      box-shadow var(--motion-fast) var(--motion-ease-out),
+      opacity var(--motion-fast) var(--motion-ease-out);
+  }
+
+  .ui-button:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px hsl(220 40% 3% / 0.16);
+  }
+
+  .ui-button:not(:disabled):active {
+    transform: translateY(0) scale(0.985);
+    transition-duration: 70ms;
+    box-shadow: 0 1px 4px hsl(220 40% 3% / 0.18);
+  }
+
+  .ui-button:focus-visible {
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.22);
+  }
+
+  .ui-button[aria-busy="true"] {
+    cursor: wait;
+  }
+
+  .ui-button[aria-busy="true"] svg {
+    flex: 0 0 auto;
+  }
+
+  .ui-card-interactive {
+    transition:
+      transform var(--motion-fast) var(--motion-ease-out),
+      border-color var(--motion-fast) var(--motion-ease-out),
+      box-shadow var(--motion-fast) var(--motion-ease-out),
+      background-color var(--motion-fast) var(--motion-ease-out);
+  }
+
+  .ui-card-interactive:not(:disabled):hover,
+  .ui-card-interactive:focus-visible {
+    transform: translateY(-2px);
+  }
+
+  .ui-card-interactive:active {
+    transform: translateY(0) scale(0.995);
+  }
+
+  /* Compatibility utilities used by older feature cards/badges. */
+  .hover-elevate {
+    transition: transform var(--motion-fast) var(--motion-ease-out), box-shadow var(--motion-fast) var(--motion-ease-out);
+  }
+
+  .hover-elevate:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(220 40% 3% / 0.14);
+  }
+
+  .active-elevate-2:active {
+    transform: translateY(0) scale(0.985);
+  }
+
+  /* Consistent, low-cost entrance used by view layers and async panels. */
+  .ui-view-enter {
+    animation: ui-view-enter var(--motion-panel) var(--motion-ease-out) both;
+  }
+
+  .ui-view-layer[data-active="true"] {
+    animation: ui-view-enter var(--motion-panel) var(--motion-ease-out) both;
+  }
+
+  .ui-view-layer[data-active="false"] {
+    animation: none;
+  }
+
+  .ui-reveal {
+    animation: ui-reveal var(--motion-panel) var(--motion-ease-out) both;
+  }
+
+  .ui-popover-enter {
+    animation: ui-popover-enter var(--motion-fast) var(--motion-ease-out) both;
+    transform-origin: var(--transform-origin, center top);
+  }
+
+  .ui-dialog-overlay {
+    animation: ui-dialog-overlay-in var(--motion-panel) var(--motion-ease-out) both;
+  }
+
+  @keyframes ui-view-enter {
+    from { opacity: 0; transform: translate3d(0, 6px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+
+  @keyframes ui-reveal {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes ui-popover-enter {
+    from { opacity: 0; transform: translateY(-3px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes ui-dialog-overlay-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Button hover animations */
+  .animate-button {
+    transition: transform 0.2s ease-out, filter 0.2s ease-out;
+  }
+  
+  .animate-button:hover {
+    @apply scale-[1.02] brightness-110;
+  }
+  
+  .animate-button:active {
+    @apply scale-[0.98] brightness-95;
+  }
+
+  /* Panel slide-in animations */
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Fade in animation */
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Scale in animation */
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Smooth expand/collapse */
+  .animate-expand {
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Hover lift effect */
+  .hover-lift {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+
+  .hover-lift:hover {
+    @apply -translate-y-0.5 shadow-lg;
+  }
+
+  /* Smooth color transitions */
+  .smooth-colors {
+    transition: color 0.2s ease-out, background-color 0.2s ease-out, border-color 0.2s ease-out;
+  }
+
+  /* Pulse animation for active states */
+  .pulse-active {
+    animation: pulseActive 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseActive {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+}
+
+/* Shared legacy class retained for compatibility with feature views. These
+   controls keep a restrained Aero/Win7 hint used by the scanner toolbar and
+   the left navigation without looking like heavy skeuomorphic buttons. */
+.win7-button {
+  @apply relative overflow-hidden rounded-lg text-sm font-semibold cursor-pointer select-none flex items-center justify-center;
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--control-face)),
+    hsl(var(--control-face-strong))
+  );
+  border-width: 1px;
+  border-color: hsl(var(--control-border));
+  color: hsl(var(--control-text));
+  background-clip: padding-box;
+  box-shadow:
+    inset 0 1px 0 hsl(var(--control-highlight) / 0.35),
+    0 1px 3px hsl(220 40% 3% / 0.14);
+  transition:
+    transform var(--motion-fast) var(--motion-ease-out),
+    color var(--motion-fast) var(--motion-ease-out),
+    background-color var(--motion-fast) var(--motion-ease-out),
+    border-color var(--motion-fast) var(--motion-ease-out),
+    box-shadow var(--motion-fast) var(--motion-ease-out),
+    opacity var(--motion-fast) var(--motion-ease-out);
+}
+
+.win7-button:not(:disabled):hover {
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--control-hover)),
+    hsl(var(--control-hover-strong))
+  );
+  border-color: hsl(var(--ring) / 0.52);
+  box-shadow:
+    inset 0 1px 0 hsl(var(--control-highlight) / 0.45),
+    0 2px 5px hsl(220 40% 3% / 0.16);
+  transform: translateY(-1px);
+}
+
+.win7-button.active,
+.win7-button:not(:disabled):active {
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--accent) / 0.9),
+    hsl(var(--control-face-strong))
+  );
+  box-shadow:
+    inset 0 1px 2px hsl(220 40% 3% / 0.16),
+    0 0 0 1px hsl(var(--ring) / 0.16);
+  border-color: hsl(var(--ring) / 0.58);
+  transform: translateY(0) scale(0.995);
+}
+
+.win7-button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px hsl(var(--ring) / 0.18);
+}
+
+.win7-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+/* Theme changes are a state change, not a 300ms animation. This prevents the
+   light palette from appearing to lag while large panels repaint. */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+}
+
+.win7-button > svg,
+.ui-button > svg {
+  transition: transform var(--motion-fast) var(--motion-ease-out), opacity var(--motion-fast) var(--motion-ease-out);
+}
+
+.win7-button:not(:disabled):hover > svg,
+.ui-button:not(:disabled):hover > svg {
+  transform: scale(1.02);
+}
+
+/* Panel Styles */
+.win7-panel {
+  @apply bg-background border-b border-border shadow-sm;
+  background-image: linear-gradient(
+    to bottom,
+    hsl(var(--control-highlight) / 0.22),
+    transparent
+  );
+}
+
+.dark .win7-panel {
+  background-image: none;
+}
+
+/* Ultra Thin Sleek Scrollbar - Only shows when needed */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover {
+  scrollbar-color: rgba(120, 120, 120, 0.3) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 140, 140, 0.5) !important;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: rgba(100, 100, 100, 0.7) !important;
+}
+
+/* Dark mode */
+.dark *:hover {
+  scrollbar-color: rgba(180, 180, 180, 0.25) transparent;
+}
+
+.dark *:hover::-webkit-scrollbar-thumb {
+  background: rgba(180, 180, 180, 0.25);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 200, 200, 0.4) !important;
+}
+
+.dark ::-webkit-scrollbar-thumb:active {
+  background: rgba(220, 220, 220, 0.6) !important;
+}
+
+/* Even thinner for ScrollArea */
+[data-radix-scroll-area-viewport] {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+[data-radix-scroll-area-viewport]:hover {
+  scrollbar-color: rgba(120, 120, 120, 0.3) transparent;
+}
+
+[data-radix-scroll-area-viewport]::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+[data-radix-scroll-area-viewport]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-radix-scroll-area-viewport]::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+[data-radix-scroll-area-viewport]:hover::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.25);
+}
+
+[data-radix-scroll-area-viewport]::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 140, 140, 0.4) !important;
+}
+
+.dark [data-radix-scroll-area-viewport]:hover::-webkit-scrollbar-thumb {
+  background: rgba(180, 180, 180, 0.2);
+}
+
+.dark [data-radix-scroll-area-viewport]::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 200, 200, 0.35) !important;
+}
+
+/* ✅ SMOOTH SCROLLING: Optimize all overflow containers */
+.overflow-y-auto,
+.overflow-y-scroll,
+.overflow-auto {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ✅ SMOOTH RESIZING: Hardware acceleration for resizable panels */
+[data-panel-group],
+[data-panel],
+[data-panel-resize-handle],
+[data-resize-handle] {
+  /* Enable GPU acceleration for smooth resizing */
+  will-change: width, height;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  /* ✅ CRITICAL: NO transitions on resize elements */
+  transition: none !important;
+}
+
+/* ✅ SMOOTH RESIZING: Optimize panel content during resize */
+[data-panel-group] > [data-panel] > * {
+  /* Prevent layout thrashing during resize */
+  contain: layout style;
+  /* ✅ CRITICAL: NO transitions on panel content */
+  transition: none !important;
+}
+
+/* ✅ SMOOTH RESIZING: Optimize resize handle */
+[data-panel-resize-handle],
+[data-resize-handle] {
+  /* Keep the grab rail transparent; the grip itself carries the affordance. */
+  background-color: transparent !important;
+  border-color: transparent !important;
+  /* Smooth cursor change */
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  /* Ensure handle is always on top */
+  z-index: 10;
+  /* Prevent text selection during drag */
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  /* ✅ CURSOR FIX: Proper cursor for resize handles */
+  cursor: ns-resize;
+}
+
+[data-panel-resize-handle][data-panel-group-direction="horizontal"],
+[data-resize-handle][data-panel-group-direction="horizontal"] {
+  cursor: ew-resize;
+}
+
+[data-panel-resize-handle]:hover,
+[data-resize-handle]:hover {
+  /* Visual feedback is carried by the floating grip, not a filled bar. */
+  background-color: transparent !important;
+}
+
+[data-panel-resize-handle]:active,
+[data-resize-handle]:active {
+  /* Visual feedback during drag */
+  opacity: 1;
+  background-color: transparent !important;
+  /* ✅ PERFORMANCE: Disable transitions during active drag */
+  transition: none;
+}
+
+/* ✅ PERFORMANCE: Optimize during resize operation */
+[data-panel-group][data-panel-group-direction="vertical"]:has([data-panel-resize-handle]:active),
+[data-panel-group][data-panel-group-direction="vertical"]:has([data-resize-handle]:active) {
+  /* Disable animations during vertical resize for smooth 60fps */
+  * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+[data-panel-group][data-panel-group-direction="horizontal"]:has([data-panel-resize-handle]:active),
+[data-panel-group][data-panel-group-direction="horizontal"]:has([data-resize-handle]:active) {
+  /* Disable animations during horizontal resize for smooth 60fps */
+  * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* ✅ Disable transitions ONLY during active resize, not always */
+[data-panel-group]:has([data-panel-resize-handle]:active) *,
+[data-panel-group]:has([data-panel-resize-handle][data-resize-handle-state="drag"]) *,
+[data-panel-group]:has([data-resize-handle]:active) *,
+[data-panel-group]:has([data-resize-handle][data-resize-handle-state="drag"]) * {
+  transition: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}
+
+/* ✅ PERFORMANCE: Optimize terminal containers for smooth resize */
+.terminal-container,
+#scan-terminal-container,
+[id*="terminal-container"] {
+  /* Keep layout containment, but do not create a paint boundary or transform
+     containing block around xterm. Those optimizations can clip/reparent the
+     canvas while a panel is dragged and can trap fixed overlays over output. */
+  contain: layout style;
+  /* Optimize for resize operations */
+  overflow: hidden;
+}
+
+/* ✅ PERFORMANCE: Keep xterm's own scrolling/canvas surface native during
+   resize. xterm already batches its canvas paints; an extra transform/paint
+   containment layer causes blank frames and stale scrollback on Chromium. */
+.xterm-screen,
+.xterm-viewport,
+.xterm-canvas {
+  contain: none;
+  /* ✅ CRITICAL: Prevent repaints during resize animation */
+  transition: none !important;
+}
+
+/* ✅ FIX: Ensure xterm.js terminal takes full width */
+.xterm {
+  width: 100% !important;
+  height: 100% !important;
+  /* ✅ CRITICAL: Disable transitions during resize */
+  transition: none !important;
+}
+
+.xterm-viewport {
+  width: 100% !important;
+  overflow-y: scroll !important;
+  scroll-behavior: auto !important;
+  overscroll-behavior: contain;
+  /* ✅ CRITICAL: Disable transitions during resize */
+  transition: none !important;
+}
+
+.xterm-screen {
+  width: 100% !important;
+  /* ✅ CRITICAL: Disable transitions during resize */
+  transition: none !important;
+}
+
+/* ✅ PERFORMANCE: Optimize all resizable content */
+.resizable-content {
+  /* Enable GPU acceleration */
+  will-change: width, height;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  /* Prevent layout shifts during resize without clipping terminal overlays */
+  contain: layout style;
+}
+
+
+/* Dark mode button shadow overrides */
+.dark button[class*="shadow-[0_"] {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.6), 0 1px 8px rgba(0,0,0,0.4) !important;
+}
+
+.dark button[class*="shadow-[0_"]:hover {
+  box-shadow: 0 3px 6px rgba(0,0,0,0.7), 0 2px 12px rgba(0,0,0,0.5) !important;
+}
+
+.dark button[class*="shadow-[0_"]:active {
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.7), inset 0 1px 8px rgba(0,0,0,0.5) !important;
+}
+
+/* Topology Canvas - Prevent text selection during drag */
+.topology-canvas-svg text {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  pointer-events: none !important;
+}
+
+.topology-canvas-svg {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+
+/* Terminal Input - Always visible flashing cursor */
+.terminal-cursor {
+  caret-color: #22c55e;
+  animation: cursorFlash 1s step-end infinite;
+}
+
+@keyframes cursorFlash {
+  0%, 49% {
+    caret-color: #22c55e;
+  }
+  50%, 100% {
+    caret-color: transparent;
+  }
+}
+
+/* Force cursor visibility */
+.terminal-cursor:focus {
+  caret-color: #22c55e;
+  animation: cursorFlash 1s step-end infinite;
+}
+
+/* Animated thinking dots for AI loading */
+@keyframes thinking-dot {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+.animate-thinking-dot-1 {
+  animation: thinking-dot 1.4s ease-in-out infinite;
+}
+
+.animate-thinking-dot-2 {
+  animation: thinking-dot 1.4s ease-in-out 0.2s infinite;
+}
+
+.animate-thinking-dot-3 {
+  animation: thinking-dot 1.4s ease-in-out 0.4s infinite;
+}
+
+/* Smooth wave animation for scanning dots */
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-4px) scale(1.15);
+    opacity: 1;
+  }
+}
+
+/* ✅ FIX: Wave animation utility classes for loading dots */
+.animate-wave {
+  animation: wave 1.4s ease-in-out infinite;
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.animate-wave-delay-1 {
+  animation: wave 1.4s ease-in-out infinite;
+  animation-delay: 0.2s;
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.animate-wave-delay-2 {
+  animation: wave 1.4s ease-in-out infinite;
+  animation-delay: 0.4s;
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.animate-wave-delay-3 {
+  animation: wave 1.4s ease-in-out infinite;
+  animation-delay: 0.6s;
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.animate-wave-delay-4 {
+  animation: wave 1.4s ease-in-out infinite;
+  animation-delay: 0.8s;
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* ✅ MODERN: Smooth bouncing dot animation for loading states */
+@keyframes bounce-dot {
+  0%, 80%, 100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  40% {
+    transform: translateY(-7px);
+    opacity: 1;
+  }
+}
+
+.animate-bounce-dot {
+  animation: bounce-dot 1.4s ease-in-out infinite;
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* Visible state for intersection-based transitions */
+.animate-in {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+.terminal-search-bar {
+  width: min(450px, calc(100% - 1rem));
+  min-width: 0;
+}
+
+/* Accessibility is part of the interaction contract. Respect OS/browser
+   reduced-motion preferences and remove movement without hiding state change. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .ui-button:not(:disabled):hover,
+  .win7-button:not(:disabled):hover,
+  .ui-button:not(:disabled):active,
+  .win7-button:not(:disabled):active {
+    transform: none;
+  }
+}

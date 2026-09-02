@@ -1,0 +1,207 @@
+name: Desktop Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify release tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+      - name: Release foundation preflight
+        run: npm run release:foundation -- --ci
+
+
+      - name: Check tag matches package version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json','utf8')); const lock=JSON.parse(fs.readFileSync('package-lock.json','utf8')); const tag=process.env.RELEASE_TAG.replace(/^v/,''); if (pkg.version !== tag || lock.version !== tag || lock.packages?.['']?.version !== tag) { console.error('package.json/package-lock.json versions must all match tag '+tag); process.exit(1); }"
+
+      - name: Dependency audit
+        run: npm run audit:dependencies
+
+      - name: Platform compatibility audit
+        run: npm run audit:platform
+
+      - name: Type checks
+        run: npm run check && npm run check:electron
+
+      - name: Unit tests
+        run: npm test
+
+  build:
+    name: Build ${{ matrix.target }} release
+    needs: verify
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      BUILD_ENCRYPTION_SECRET: ${{ secrets.BUILD_ENCRYPTION_SECRET }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: windows-latest
+            target: win
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify build encryption secret is configured
+        run: node -e "if (!/^[a-fA-F0-9]{64}$/.test(process.env.BUILD_ENCRYPTION_SECRET || '')) { console.error('BUILD_ENCRYPTION_SECRET must be a 64-character hexadecimal CI secret'); process.exit(1); }"
+
+      - name: Verify Windows signing secrets are configured
+        if: matrix.target == 'win'
+        shell: pwsh
+        env:
+          WINDOWS_CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+          WINDOWS_CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_CSC_LINK) -or [string]::IsNullOrWhiteSpace($env:WINDOWS_CSC_KEY_PASSWORD)) {
+            throw 'Windows release signing is required. Configure WINDOWS_CSC_LINK and WINDOWS_CSC_KEY_PASSWORD before pushing a release tag.'
+          }
+
+
+      - name: Platform compatibility audit
+        run: npm run audit:platform
+
+      - name: Build, audit, and checksum native Electron artifact
+        run: npm run build:production:${{ matrix.target }}
+        env:
+          CSC_LINK: ${{ matrix.target == 'win' && secrets.WINDOWS_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ matrix.target == 'win' && secrets.WINDOWS_CSC_KEY_PASSWORD || '' }}
+
+      - name: Verify generated release checksums
+        run: npm run release:verify-checksums -- release
+
+      - name: Verify Windows release signatures
+        if: matrix.target == 'win'
+        shell: pwsh
+        run: |
+          $artifacts = Get-ChildItem -LiteralPath release -File -Filter '*.exe'
+          if ($artifacts.Count -eq 0) {
+            throw 'No Windows EXE artifacts were produced.'
+          }
+          foreach ($artifact in $artifacts) {
+            $signature = Get-AuthenticodeSignature -LiteralPath $artifact.FullName
+            if ($signature.Status -ne 'Valid') {
+              throw "Unsigned or invalid Windows artifact: $($artifact.Name) ($($signature.Status))"
+            }
+          }
+
+
+      - name: Upload native release directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: osecbox-release-${{ matrix.target }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: osecbox-release-win
+          path: artifacts/win
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: osecbox-release-linux
+          path: artifacts/linux
+
+
+      - name: Verify downloaded artifact checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          for target in win linux; do
+            test -f "artifacts/$target/SHA256SUMS.txt"
+            (
+              cd "artifacts/$target"
+              sha256sum --check SHA256SUMS.txt
+            )
+          done
+
+      - name: Collect distributables and generate aggregate checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f artifacts/win/latest.yml
+          mkdir -p publish/win publish/linux
+          for target in win linux; do
+            for file in "artifacts/$target"/*; do
+              [ -f "$file" ] || continue
+              name="$(basename "$file")"
+              case "$name" in
+                *.exe|*.blockmap|latest*.yml|*.AppImage|*.deb|*.tar.gz)
+                  cp "$file" "publish/$target/$name"
+                  ;;
+              esac
+            done
+          done
+          (
+            cd publish
+            # GitHub Release assets are flattened when downloaded. Generate
+            # the aggregate manifest with the published asset basenames rather
+            # than local staging paths such as win/foo.exe.
+            for target in win linux; do
+              for file in "$target"/*; do
+                [ -f "$file" ] || continue
+                sha256sum "$file" | sed "s#  $target/#  #"
+              done
+            done | sort -k2 > SHA256SUMS.txt
+          )
+
+      - name: Publish tagged GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            publish/win/*
+            publish/linux/*
+            publish/SHA256SUMS.txt

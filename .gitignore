@@ -1,0 +1,109 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Tests, logs, and local/manual checks
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.pid
+*.pid.lock
+tests/manual/
+tests/scratch/
+scripts/scratch/
+scratch/
+**/*-local-test.*
+**/*-scratch.*
+
+# Generated output
+dist/
+out/
+release/
+app/
+encrypted-modules/
+**/.vite/
+*.tsbuildinfo
+*.map
+*.asar
+*.blockmap
+
+# Local recovery copies and stale source snapshots
+.plaintext-backup/
+*.plaintext-backup/
+*.backup*
+
+# Secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.secret
+*.secrets
+# Code-signing certificates and private-key material
+*.pfx
+*.p12
+*.pem
+*.key
+*.cer
+*.crt
+BUILD_ENCRYPTION_SECRET
+JWT_SECRET
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+license-server/.env
+license-server/node_modules/
+
+# Large local media assets
+*.mp4
+
+# Electron artifacts
+*.dmg
+*.exe
+*.AppImage
+*.deb
+*.rpm
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+.replit
+*.sublime-*
+
+# Local caches and temporary files
+.cache/
+.npm-cache*/
+.npm-audit*/
+.electron-cache/
+.temp/
+tmp/
+.internal/
+client/node_modules/
+
+# Local design notes and retired editor state
+.kiro/
+
+# Scratch/generated documentation is ignored, while curated repository docs are
+# allowed so GitHub has a readable entry point.
+*.md
+*.mdx
+!README.md
+!CONTRIBUTING.md
+!SECURITY.md
+!CHANGELOG.md
+!docs/
+!docs/**/*.md
+!docs/**/*.mdx
+**/*-draft.md
+**/*_draft.md
+**/*-notes.md
+**/*_notes.md
+**/*.generated.md

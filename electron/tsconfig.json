@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "outDir": "../dist/electron",
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "strict": true
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "electron", "main-F-WORKING.ts"]
+}
