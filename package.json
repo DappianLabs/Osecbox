@@ -121,7 +121,7 @@
     "@remotion/player": "^4.0.441",
     "@tanstack/react-query": "^5.60.5",
     "@tailwindcss/vite": "^4.1.14",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "@vitest/coverage-v8": "^4.1.11",
     "@types/connect-pg-simple": "^7.0.3",
