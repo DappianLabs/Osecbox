@@ -60,6 +60,21 @@ Replace the example tag with the version in `package.json`. The final gate is
 read-only: it does not create commits, tags, releases, or files under
 `release/`.
 
+## CI security gates
+
+Pull requests run GitHub's dependency-review action and fail on high-severity
+dependency changes. Trusted packaging jobs run defense-in-depth scans over the
+generated release directory before uploading or publishing it:
+
+- Linux runners install ClamAV, refresh its signatures with freshclam, and
+  scan every generated artifact.
+- Windows runners update Microsoft Defender signatures and run its command-line
+  custom scan over the generated release directory.
+
+A clean antivirus result is a release gate, not a guarantee that software is
+malware-free. Users should still download from the official GitHub Release,
+verify checksums, and keep endpoint protection enabled.
+
 ## Required GitHub Actions secrets
 
 Create these under the repository's Settings → Secrets and variables →

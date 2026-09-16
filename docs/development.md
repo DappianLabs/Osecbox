@@ -17,6 +17,8 @@ On Windows, [`start-electron.bat`](../start-electron.bat) is the compatibility l
 
 ## Verification commands
 
+Public Windows releases require WINDOWS_CSC_LINK and WINDOWS_CSC_KEY_PASSWORD; tagged builds are blocked until Authenticode verification succeeds.
+
 Run these before opening a pull request:
 
 ```sh

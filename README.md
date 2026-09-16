@@ -134,6 +134,8 @@ For vulnerability reporting and release-verification guidance, see [SECURITY.md]
 
 Releases are published on [GitHub Releases](https://github.com/DappianLabs/Osecbox/releases). Current releases cover Windows x64 and Linux x64. Maintainer-only signing, packaging, checksum, and release procedures are intentionally kept in [the release guide](docs/release.md), not in this product overview.
 
+Windows release artifacts are published only after Authenticode verification; maintainers configure WINDOWS_CSC_LINK and WINDOWS_CSC_KEY_PASSWORD in GitHub Actions secrets.
+
 ## Documentation
 
 - [Architecture](docs/architecture.md) — high-level runtime boundaries

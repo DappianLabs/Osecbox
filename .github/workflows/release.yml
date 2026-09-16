@@ -124,6 +124,37 @@ jobs:
           }
 
 
+      - name: Scan Linux artifacts with ClamAV
+        if: matrix.target == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends clamav clamav-freshclam
+          sudo systemctl stop clamav-freshclam.service 2>/dev/null || true
+          sudo freshclam --stdout
+          clamscan --recursive --infected --no-summary release
+
+      - name: Scan Windows artifacts with Microsoft Defender
+        if: matrix.target == 'win'
+        shell: pwsh
+        run: |
+          $mpCmdRun = Get-ChildItem -LiteralPath "$env:ProgramData/Microsoft/Windows Defender/Platform" -Filter MpCmdRun.exe -Recurse -File -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime |
+            Select-Object -Last 1
+          if (-not $mpCmdRun) {
+            throw 'Microsoft Defender command-line scanner was not found on the Windows runner.'
+          }
+          & $mpCmdRun.FullName -SignatureUpdate
+          if ($LASTEXITCODE -ne 0) {
+            throw "Microsoft Defender signature update failed with exit code $LASTEXITCODE."
+          }
+          $releasePath = (Resolve-Path release).Path
+          & $mpCmdRun.FullName -Scan -ScanType 3 -File $releasePath
+          if ($LASTEXITCODE -ne 0) {
+            throw "Microsoft Defender reported a scan failure or threat with exit code $LASTEXITCODE."
+          }
+
       - name: Upload native release directory
         uses: actions/upload-artifact@v4
         with:

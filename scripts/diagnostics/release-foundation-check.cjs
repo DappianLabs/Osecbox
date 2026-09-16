@@ -271,6 +271,23 @@ check(
   releaseWorkflow.includes('Get-AuthenticodeSignature'),
 );
 check(
+  'CI and release workflows scan packaged artifacts with updated AV engines',
+  ciWorkflow.includes('clamscan') &&
+  ciWorkflow.includes('freshclam') &&
+  ciWorkflow.includes('MpCmdRun.exe') &&
+  ciWorkflow.includes('ProgramData/Microsoft/Windows Defender/Platform') &&
+  releaseWorkflow.includes('clamscan') &&
+  releaseWorkflow.includes('freshclam') &&
+  releaseWorkflow.includes('MpCmdRun.exe') &&
+  releaseWorkflow.includes('ProgramData/Microsoft/Windows Defender/Platform'),
+);
+check(
+  'Pull requests run dependency review',
+  ciWorkflow.includes('actions/dependency-review-action@v4') &&
+  ciWorkflow.includes('fail-on-severity: high'),
+);
+
+check(
   'Release workflow verifies per-target checksums before publishing',
   releaseWorkflow.includes('release:verify-checksums') &&
   releaseWorkflow.includes('sha256sum --check'),
