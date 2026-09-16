@@ -163,7 +163,7 @@
     "react-day-picker": "^9.11.1",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.66.0",
-    "react-resizable-panels": "^2.1.9",
+    "react-resizable-panels": "^4.12.3",
     "remotion": "^4.0.441",
     "sonner": "^2.0.7",
     "tailwindcss": "^4.1.14",
