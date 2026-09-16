@@ -146,7 +146,7 @@
     "cross-env": "^10.1.0",
     "date-fns": "^3.6.0",
     "drizzle-kit": "^0.31.4",
-    "electron": "^43.4.0",
+    "electron": "^44.3.0",
     "electron-builder": "^26.0.12",
     "embla-carousel-react": "^8.6.0",
     "esbuild": "^0.25.0",
