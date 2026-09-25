@@ -121,8 +121,8 @@ check('package-lock.json exists', Boolean(lock));
 check('Electron Builder configuration exists', Boolean(builder));
 check(
   'Node engine and .nvmrc agree',
-  pkg && pkg.engines && pkg.engines.node === '>=22.12.0' &&
-  readText('.nvmrc').trim() === '22.12.0',
+  pkg && pkg.engines && pkg.engines.node === '>=22.13.0' &&
+  readText('.nvmrc').trim() === '22.13.0',
 );
 check(
   'package and lock versions agree',

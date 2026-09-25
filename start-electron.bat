@@ -4,14 +4,14 @@ cd /d "%~dp0"
 
 where node >nul 2>&1
 if errorlevel 1 (
-  echo Node.js 22.12.0 or newer is required. Install it from https://nodejs.org/ and run this file again.
+  echo Node.js 22.13.0 or newer is required. Install it from https://nodejs.org/ and run this file again.
   pause
   exit /b 1
 )
 
-node -e "if (Number(process.versions.node.split('.')[0]) < 22) process.exit(1)"
+node -e "const v=process.versions.node.split('.').map(Number); if (v[0] < 22 || (v[0] === 22 && v[1] < 13)) process.exit(1)"
 if errorlevel 1 (
-  echo Node.js 22.12.0 or newer is required. Upgrade Node.js and run this file again.
+  echo Node.js 22.13.0 or newer is required. Upgrade Node.js and run this file again.
   pause
   exit /b 1
 )

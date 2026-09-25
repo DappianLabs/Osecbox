@@ -9,7 +9,7 @@ npm run dev:electron
 
 For local server-backed development, copy `.env.example` to `.env` and set a
 random `JWT_SECRET` with at least 32 characters. The `.env` file is ignored and
-must not be committed. The supported Node.js version is `22.12.0`.
+must not be committed. The supported Node.js version is `22.13.0`.
 
 The renderer can also be run independently with `npm run dev:client`; the Express development server is available through `npm run dev`.
 

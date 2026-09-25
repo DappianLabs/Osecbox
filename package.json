@@ -26,7 +26,7 @@
     "wsl2"
   ],
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "clean": "node -e \"const fs=require('fs');['node_modules/.vite','dist','.vite','client/.vite'].forEach(d=>{try{fs.rmSync(d,{recursive:true,force:true})}catch(e){}})\"",
