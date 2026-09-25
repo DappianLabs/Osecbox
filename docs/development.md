@@ -17,7 +17,7 @@ On Windows, [`start-electron.bat`](../start-electron.bat) is the compatibility l
 
 ## Verification commands
 
-Public Windows releases require WINDOWS_CSC_LINK and WINDOWS_CSC_KEY_PASSWORD; tagged builds are blocked until Authenticode verification succeeds.
+Public Windows releases are intentionally released without a commercial Authenticode certificate. Tagged builds publish SHA-256 checksums and generate GitHub Artifact Attestations for final release distributables; attestations provide build provenance but do not make Windows SmartScreen trust an unsigned EXE.
 
 Run these before opening a pull request:
 
@@ -74,9 +74,9 @@ git push origin v1.0.2
 
 The tag workflow builds Windows and Linux independently, runs the compatibility, dependency, package, and release-foundation audits, writes per-target checksums, verifies the downloaded build outputs, and publishes one GitHub Release. Set the repository Actions secret `BUILD_ENCRYPTION_SECRET` to a 64-character hexadecimal value before the first release. The workflow uses the automatic `GITHUB_TOKEN`; no personal token should be committed or embedded in the app.
 
-The GitHub provider configuration in `electron-builder.json` and the generated `latest.yml`/platform metadata are part of the updater contract. Keep all metadata, blockmaps, and installers from one tagged build in the same release. The installed NSIS package can use `electron-updater`; the portable Windows artifact is intentionally manual-update only. Windows updater signature verification is enabled in `electron-builder.json`.
+The GitHub provider configuration in `electron-builder.json` and the generated `latest.yml`/platform metadata are part of the updater contract. Keep all metadata, blockmaps, and installers from one tagged build in the same release. The installed NSIS package can use `electron-updater`; the portable Windows artifact is intentionally manual-update only. Windows updater signature verification is disabled in `electron-builder.json` because this release is intentionally unsigned.
 
-The release workflow requires `WINDOWS_CSC_LINK`/`WINDOWS_CSC_KEY_PASSWORD` for the public Windows release. Local builds may remain unsigned, but a tagged release fails before publication if Windows EXEs do not pass Authenticode. Linux packages are not platform-signed by this project; users should verify the published SHA-256 manifest instead. See [`docs/release.md`](release.md) for the exact secret preparation and clean-machine acceptance checklist.
+The release workflow requires only BUILD_ENCRYPTION_SECRET for packaging. Windows EXEs are intentionally unsigned; the workflow keeps Microsoft Defender scanning, final SHA-256 manifests, and GitHub Artifact Attestations for the final Windows and Linux distributables. Attestations do not replace Authenticode and do not prevent Windows SmartScreen or Unknown Publisher warnings. See docs/release.md for the checksum, attestation, and clean-machine acceptance checklist.
 
 Session and settings persistence is per-user and uses Electron's `app.getPath('userData')`; do not hard-code a home-directory path in new code. The session handler performs a copy-only migration from the legacy `.osecbox/sessions` directory.
 

@@ -8,6 +8,7 @@ on:
 permissions:
   contents: read
 
+
 concurrency:
   group: desktop-release-${{ github.ref }}
   cancel-in-progress: false
@@ -56,6 +57,10 @@ jobs:
     needs: verify
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
     env:
       BUILD_ENCRYPTION_SECRET: ${{ secrets.BUILD_ENCRYPTION_SECRET }}
     strategy:
@@ -84,46 +89,32 @@ jobs:
       - name: Verify build encryption secret is configured
         run: node -e "if (!/^[a-fA-F0-9]{64}$/.test(process.env.BUILD_ENCRYPTION_SECRET || '')) { console.error('BUILD_ENCRYPTION_SECRET must be a 64-character hexadecimal CI secret'); process.exit(1); }"
 
-      - name: Verify Windows signing secrets are configured
-        if: matrix.target == 'win'
-        shell: pwsh
-        env:
-          WINDOWS_CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
-          WINDOWS_CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
-        run: |
-          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_CSC_LINK) -or [string]::IsNullOrWhiteSpace($env:WINDOWS_CSC_KEY_PASSWORD)) {
-            throw 'Windows release signing is required. Configure WINDOWS_CSC_LINK and WINDOWS_CSC_KEY_PASSWORD before pushing a release tag.'
-          }
-
-
       - name: Platform compatibility audit
         run: npm run audit:platform
 
       - name: Build, audit, and checksum native Electron artifact
         run: npm run build:production:${{ matrix.target }}
         env:
-          CSC_LINK: ${{ matrix.target == 'win' && secrets.WINDOWS_CSC_LINK || '' }}
-          CSC_KEY_PASSWORD: ${{ matrix.target == 'win' && secrets.WINDOWS_CSC_KEY_PASSWORD || '' }}
+          # This release intentionally does not use a commercial Authenticode
+          # certificate. Disable runner certificate discovery so the result is
+          # deterministic and remains unsigned.
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
-      - name: Verify generated release checksums
-        run: npm run release:verify-checksums -- release
-
-      - name: Verify Windows release signatures
+      - name: Confirm Windows artifacts are intentionally unsigned
         if: matrix.target == 'win'
         shell: pwsh
         run: |
-          $artifacts = Get-ChildItem -LiteralPath release -File -Filter '*.exe'
-          if ($artifacts.Count -eq 0) {
-            throw 'No Windows EXE artifacts were produced.'
+          $executables = @(Get-ChildItem -LiteralPath release -File -Filter '*.exe')
+          if ($executables.Count -eq 0) {
+            throw 'No Windows EXE artifacts were produced for the unsigned release.'
           }
-          foreach ($artifact in $artifacts) {
-            $signature = Get-AuthenticodeSignature -LiteralPath $artifact.FullName
-            if ($signature.Status -ne 'Valid') {
-              throw "Unsigned or invalid Windows artifact: $($artifact.Name) ($($signature.Status))"
-            }
+          foreach ($executable in $executables) {
+            Write-Host "Publishing without commercial Authenticode signing: $($executable.Name)"
           }
 
-
+      - name: Refresh Windows updater metadata for final unsigned installer
+        if: matrix.target == 'win'
+        run: node scripts/diagnostics/refresh-windows-updater-metadata.cjs
       - name: Scan Linux artifacts with ClamAV
         if: matrix.target == 'linux'
         shell: bash
@@ -155,6 +146,51 @@ jobs:
             throw "Microsoft Defender reported a scan failure or threat with exit code $LASTEXITCODE."
           }
 
+      - name: Generate final release checksums
+        run: npm run release:checksums
+
+      - name: Verify final release checksums
+        run: npm run release:verify-checksums -- release
+
+      - name: Verify final Windows attestation subjects
+        if: matrix.target == 'win'
+        shell: pwsh
+        run: |
+          $subjects = @(Get-ChildItem -LiteralPath release -File -Filter '*.exe')
+          if ($subjects.Count -eq 0) {
+            throw 'No final Windows EXE subjects were found for artifact attestation.'
+          }
+          foreach ($subject in $subjects) {
+            Write-Host "Final Windows attestation subject: $($subject.FullName)"
+          }
+
+      - name: Verify final Linux attestation subjects
+        if: matrix.target == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t subjects < <(find release -maxdepth 1 -type f \( -name '*.AppImage' -o -name '*.deb' -o -name '*.tar.gz' \) -print | sort)
+          if [ "${#subjects[@]}" -eq 0 ]; then
+            echo 'No final Linux distributable subjects were found for artifact attestation.' >&2
+            exit 1
+          fi
+          printf 'Final Linux attestation subject: %s\n' "${subjects[@]}"
+
+      - name: Attest final Windows distributables
+        if: matrix.target == 'win'
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            ${{ github.workspace }}/release/*.exe
+
+      - name: Attest final Linux distributables
+        if: matrix.target == 'linux'
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            ${{ github.workspace }}/release/*.AppImage
+            ${{ github.workspace }}/release/*.deb
+            ${{ github.workspace }}/release/*.tar.gz
       - name: Upload native release directory
         uses: actions/upload-artifact@v4
         with:

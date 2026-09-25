@@ -5,7 +5,7 @@
  * Release-foundation preflight.
  *
  * This check is deliberately separate from packaging. It validates the
- * repository, target matrix, signing contract, updater metadata, and CI
+ * repository, target matrix, unsigned-release contract, updater metadata, and CI
  * guardrails before a real release tag is pushed. It never creates a tag,
  * publishes a release, reads secret contents, or changes build output.
  */
@@ -90,9 +90,6 @@ function runGit(gitArgs) {
   };
 }
 
-function hasNonEmptyEnv() {
-  return Array.from(arguments).some((name) => String(process.env[name] || '').trim().length > 0);
-}
 
 function releaseTagFromEnvironment() {
   if (requestedTag) return requestedTag;
@@ -192,8 +189,8 @@ check(
   builder.nsis.allowToChangeInstallationDirectory === true,
 );
 check(
-  'Windows updater signature verification is enabled',
-  builder && builder.win && builder.win.verifyUpdateCodeSignature === true,
+  'Windows updater does not require Authenticode signatures',
+  builder && builder.win && builder.win.verifyUpdateCodeSignature === false,
 );
 check(
   'Linux ships AppImage, deb, and tar.gz targets',
@@ -264,11 +261,34 @@ check(
   'Release workflow builds Windows and Linux targets',
   /target:\s+win/.test(releaseWorkflow) && /target:\s+linux/.test(releaseWorkflow),
 );
+const forbiddenSigningReferences = [
+  'WINDOWS_CSC_LINK',
+  'WINDOWS_CSC_KEY_PASSWORD',
+  'CSC_LINK',
+  'CSC_KEY_PASSWORD',
+  'SSLcom/esigner-codesign',
+  'ES_USERNAME',
+  'ES_PASSWORD',
+  'CREDENTIAL_ID',
+  'ES_TOTP_SECRET',
+];
 check(
-  'Release workflow verifies Windows Authenticode signatures',
-  releaseWorkflow.includes('WINDOWS_CSC_LINK') &&
-  releaseWorkflow.includes('WINDOWS_CSC_KEY_PASSWORD') &&
-  releaseWorkflow.includes('Get-AuthenticodeSignature'),
+  'Release workflow intentionally leaves Windows EXEs unsigned',
+  releaseWorkflow.includes('Publishing without commercial Authenticode signing') &&
+  forbiddenSigningReferences.every((reference) => !releaseWorkflow.includes(reference)),
+);
+check(
+  'Release workflow grants artifact-attestation permissions',
+  releaseWorkflow.includes('id-token: write') &&
+  releaseWorkflow.includes('attestations: write') &&
+  releaseWorkflow.includes('actions/attest@v4'),
+);
+check(
+  'Release workflow attests final Windows and Linux distributables',
+  releaseWorkflow.includes('release/*.exe') &&
+  releaseWorkflow.includes('release/*.AppImage') &&
+  releaseWorkflow.includes('release/*.deb') &&
+  releaseWorkflow.includes('release/*.tar.gz'),
 );
 check(
   'CI and release workflows scan packaged artifacts with updated AV engines',
@@ -297,6 +317,12 @@ check(
   releaseWorkflow.includes('latest.yml') && releaseWorkflow.includes('*.blockmap'),
 );
 check(
+  'Windows updater metadata is refreshed from the final installer',
+  fileIsPresent('scripts/diagnostics/refresh-windows-updater-metadata.cjs') &&
+  releaseWorkflow.includes('refresh-windows-updater-metadata.cjs') &&
+  releaseWorkflow.includes('Generate final release checksums'),
+);
+check(
   'Release workflow publishes with the automatic GitHub token',
   releaseWorkflow.includes('softprops/action-gh-release') &&
   releaseWorkflow.includes('secrets.GITHUB_TOKEN'),
@@ -319,9 +345,10 @@ check(
     .every((entry) => gitignore.includes(entry)),
 );
 check(
-  'Release documentation explains signing and target scope',
-  readme.includes('WINDOWS_CSC_LINK') &&
-  developmentDocs.includes('WINDOWS_CSC_LINK') &&
+  'Release documentation explains unsigned Windows artifacts and provenance',
+  readme.includes('without a commercial Authenticode certificate') &&
+  developmentDocs.includes('unsigned') &&
+  developmentDocs.includes('Artifact Attestations') &&
   fileIsPresent('docs/release.md'),
 );
 
@@ -370,24 +397,11 @@ if (releaseMode) {
 
 const checksWindows = !target || target === 'win';
 if (checksWindows) {
-  const windowsSigningConfigured = hasNonEmptyEnv('CSC_LINK', 'WINDOWS_CSC_LINK') &&
-    hasNonEmptyEnv('CSC_KEY_PASSWORD', 'WINDOWS_CSC_KEY_PASSWORD');
-  if (releaseMode) {
-    check(
-      'Windows Authenticode credentials are configured without exposing their values',
-      windowsSigningConfigured,
-      'CSC_LINK/CSC_KEY_PASSWORD or WINDOWS_CSC_LINK/WINDOWS_CSC_KEY_PASSWORD required',
-    );
-  } else if (windowsSigningConfigured) {
-    pass('Windows signing credentials are available for this run');
-  } else {
-    warn(
-      'Windows signing credentials are not available locally',
-      'local artifacts will be unsigned; the tagged release workflow blocks without them',
-    );
-  }
+  pass(
+    'Windows release signing contract',
+    'Windows EXEs are intentionally unsigned; SHA-256 checksums and GitHub Artifact Attestations provide integrity and provenance signals',
+  );
 }
-
 if (target === 'linux' || !target) {
   pass(
     'Linux release integrity contract',

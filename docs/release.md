@@ -31,8 +31,7 @@ Windows `latest.yml` and the `.blockmap` file are updater metadata. Keep them
 with the installer from the same release, but users normally select the setup
 installer or portable EXE instead. In GitHub, users open the tagged Release,
 expand **Assets**, download the file for their platform, and verify the
-checksum before running it. Windows users should also confirm the EXE has a
-valid Authenticode signature.
+checksum before running it. Windows EXEs are intentionally unsigned, so Windows may show an Unknown Publisher or SmartScreen warning. Use SHA-256 checksums and, if desired, verify the GitHub Artifact Attestation before running it.
 
 ## Local preflight
 
@@ -48,9 +47,7 @@ npm run audit:dependencies
 npm run audit:platform
 ```
 
-The normal preflight reports warnings for local-only conditions such as
-missing signing credentials, a missing GitHub remote, and the absence of a
-release tag. The final gate turns those conditions into failures:
+The normal preflight reports warnings for local-only conditions such as a missing GitHub remote and the absence of a release tag. The final gate turns those conditions into failures:
 
 ```sh
 npm run release:foundation -- --release --target=win --tag=v1.0.2
@@ -83,8 +80,6 @@ Actions. Store values as secrets, never in the repository or workflow logs.
 | Secret | Purpose |
 | --- | --- |
 | `BUILD_ENCRYPTION_SECRET` | 64 hexadecimal characters used to generate protected runtime modules. |
-| `WINDOWS_CSC_LINK` | Base64-encoded Windows Authenticode PFX, or a supported certificate URL/path supplied to electron-builder. |
-| `WINDOWS_CSC_KEY_PASSWORD` | Password for the PFX private key. |
 
 Generate the encryption secret once with a password manager or secret manager:
 
@@ -96,30 +91,29 @@ Do not rotate `BUILD_ENCRYPTION_SECRET` casually between builds of the same
 release. Keep it in the CI secret store and rotate it through a planned
 release process.
 
-### Windows Authenticode setup
+### Windows signing and artifact provenance
 
-1. Obtain a CA-issued code-signing certificate that can be used by the
-   unattended build process. Export the certificate with its private key as a
-   password-protected PFX.
-2. Protect the PFX password separately. Do not commit the PFX, private key,
-   certificate chain, or a plaintext copy.
-3. Encode the PFX for the `WINDOWS_CSC_LINK` secret. In PowerShell:
+Windows EXEs are intentionally released without a commercial Authenticode
+certificate. The repository does not create, store, or use a fake/self-signed
+certificate, PFX, private key, or signing password. This keeps the release
+honest: Windows can display Unknown Publisher and SmartScreen can warn about
+the download.
 
-   ```powershell
-   [Convert]::ToBase64String([IO.File]::ReadAllBytes('.\osecbox-signing.pfx'))
-   ```
+The tagged workflow generates the final Windows installer and portable EXE,
+then runs Microsoft Defender, regenerates and verifies the final SHA-256
+manifest, and creates GitHub Artifact Attestations with the official
+actions/attest@v4 action. Linux AppImage, deb, and tar.gz distributables are
+attested in the same way. Attestations link the exact final file digests to the
+GitHub repository and workflow; they provide verifiable build provenance, not
+Authenticode trust, malware immunity, or SmartScreen approval.
 
-   Paste the resulting single-line value into `WINDOWS_CSC_LINK` and the PFX
-   password into `WINDOWS_CSC_KEY_PASSWORD`.
-4. The release workflow maps those secrets to electron-builder's
-   `CSC_LINK` and `CSC_KEY_PASSWORD` variables.
-5. The Windows runner checks every generated EXE with
-   `Get-AuthenticodeSignature` before the publish job can run. A missing,
-   invalid, or untrusted certificate stops the release before publication.
+To inspect an attestation with GitHub CLI after downloading an asset:
 
-The certificate subject should identify the legal publisher you want users to
-see. A valid signature improves publisher identity and tamper detection; it
-does not prove that the application is malware-free.
+    gh attestation verify OsecBox-1.0.2-x64-Setup.exe -R DappianLabs/Osecbox
+
+To verify release integrity independently, download SHA256SUMS.txt from the
+same tagged Release and run sha256sum --check SHA256SUMS.txt (or compare the
+SHA-256 value with Get-FileHash on Windows) before opening an artifact.
 
 ## Repository setup
 
