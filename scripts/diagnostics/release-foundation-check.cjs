@@ -192,8 +192,10 @@ check(
   builder.nsis.allowToChangeInstallationDirectory === true,
 );
 check(
-  'Windows updater does not require Authenticode signatures',
-  builder && builder.win && builder.win.verifyUpdateCodeSignature === false,
+  'Windows packaging and updater do not require Authenticode signatures',
+  builder && builder.win &&
+  builder.win.signExecutable === false &&
+  builder.win.verifyUpdateCodeSignature === false,
 );
 check(
   'Linux ships AppImage, deb, and tar.gz targets',

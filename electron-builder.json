@@ -50,6 +50,7 @@
   "win": {
     "target": ["nsis", "portable"],
     "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "signExecutable": false,
     "verifyUpdateCodeSignature": false
   },
   "nsis": {
