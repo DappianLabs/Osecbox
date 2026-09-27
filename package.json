@@ -1,6 +1,6 @@
 {
   "name": "osecbox",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Cross-platform Electron workspace for authorized security testing, terminal workflows, scan analysis, and attack-surface documentation.",
   "author": {
     "name": "DappianLabs",

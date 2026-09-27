@@ -2,7 +2,7 @@
 
 > **An AI-assisted desktop workstation for authorized security testing that keeps recon, exploitation, terminals, listeners, pivots, and session context in one place.**
 
-[![Version](https://img.shields.io/badge/version-1.0.2-7c3aed?style=flat-square)](https://github.com/DappianLabs/Osecbox/releases)
+[![Version](https://img.shields.io/badge/version-1.0.3-7c3aed?style=flat-square)](https://github.com/DappianLabs/Osecbox/releases)
 [![Platforms](https://img.shields.io/badge/releases-Windows%20x64%20%7C%20Linux%20x64-2563eb?style=flat-square)](https://github.com/DappianLabs/Osecbox/releases)
 [![License](https://img.shields.io/badge/license-MIT-16a34a?style=flat-square)](LICENSE)
 

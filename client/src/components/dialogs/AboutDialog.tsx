@@ -8,7 +8,7 @@ interface AboutDialogProps {
 }
 
 export function AboutDialog({ open, onClose }: AboutDialogProps) {
-  const [appVersion, setAppVersion] = React.useState('1.0.2');
+  const [appVersion, setAppVersion] = React.useState('1.0.3');
   // Prevent body scroll when dialog is open
   React.useEffect(() => {
     if (window.electron?.getAppVersion) {

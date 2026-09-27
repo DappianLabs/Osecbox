@@ -15,16 +15,16 @@ release.
 
 ## Published asset names
 
-The version below is an example for `1.0.2`; replace it with the release
-version. The GitHub Release will contain these user-facing downloads:
+The current release version is `1.0.3`. The GitHub Release will contain these
+user-facing downloads:
 
 | Platform | Asset | Use |
 | --- | --- | --- |
-| Windows x64 | `OsecBox-1.0.2-x64-Setup.exe` | Recommended per-user installer. |
-| Windows x64 | `OsecBox-1.0.2-x64.exe` | Portable, no-install fallback. |
-| Linux x64 | `OsecBox-1.0.2-x64.AppImage` | Portable Linux desktop package. |
-| Linux x64 | `OsecBox-1.0.2-x64.deb` | Debian/Ubuntu package. |
-| Linux x64 | `OsecBox-1.0.2-x64.tar.gz` | Manual archive installation. |
+| Windows x64 | `OsecBox-1.0.3-x64-Setup.exe` | Recommended per-user installer. |
+| Windows x64 | `OsecBox-1.0.3-x64.exe` | Portable, no-install fallback. |
+| Linux x64 | `OsecBox-1.0.3-x64.AppImage` | Portable Linux desktop package. |
+| Linux x64 | `OsecBox-1.0.3-x64.deb` | Debian/Ubuntu package. |
+| Linux x64 | `OsecBox-1.0.3-x64.tar.gz` | Manual archive installation. |
 | All | `SHA256SUMS.txt` | Integrity manifest for the published downloads. |
 
 Windows `latest.yml` and the `.blockmap` file are updater metadata. Keep them
@@ -50,7 +50,7 @@ npm run audit:platform
 The normal preflight reports warnings for local-only conditions such as a missing GitHub remote and the absence of a release tag. The final gate turns those conditions into failures:
 
 ```sh
-npm run release:foundation -- --release --target=win --tag=v1.0.2
+npm run release:foundation -- --release --target=win --tag=v1.0.3
 ```
 
 Replace the example tag with the version in `package.json`. The final gate is
@@ -109,7 +109,7 @@ Authenticode trust, malware immunity, or SmartScreen approval.
 
 To inspect an attestation with GitHub CLI after downloading an asset:
 
-    gh attestation verify OsecBox-1.0.2-x64-Setup.exe -R DappianLabs/Osecbox
+    gh attestation verify OsecBox-1.0.3-x64-Setup.exe -R DappianLabs/Osecbox
 
 To verify release integrity independently, download SHA256SUMS.txt from the
 same tagged Release and run sha256sum --check SHA256SUMS.txt (or compare the
@@ -176,8 +176,8 @@ Recommended GitHub repository settings:
 4. Push the matching tag:
 
    ```sh
-   git tag v1.0.2
-   git push origin v1.0.2
+   git tag v1.0.3
+   git push origin v1.0.3
    ```
 
 5. The tag workflow builds on matching native runners:
@@ -224,4 +224,3 @@ release, test the actual downloaded assets:
 Record OS build, architecture, installer type, app version, and any blocked
 runtime capability. Do not call a Windows-only rehearsal cross-platform
 certification.
-

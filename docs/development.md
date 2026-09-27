@@ -66,10 +66,10 @@ The Windows host can only certify the Windows artifact. Linux and macOS builds m
 Push a version tag only after `package.json` and `package-lock.json` agree:
 
 ```sh
-git commit -am "release: v1.0.2"
+git commit -am "release: v1.0.3"
 git push origin main
-git tag v1.0.2
-git push origin v1.0.2
+git tag v1.0.3
+git push origin v1.0.3
 ```
 
 The tag workflow builds Windows and Linux independently, runs the compatibility, dependency, package, and release-foundation audits, writes per-target checksums, verifies the downloaded build outputs, and publishes one GitHub Release. Set the repository Actions secret `BUILD_ENCRYPTION_SECRET` to a 64-character hexadecimal value before the first release. The workflow uses the automatic `GITHUB_TOKEN`; no personal token should be committed or embedded in the app.
