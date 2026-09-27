@@ -93,9 +93,12 @@ function runGit(gitArgs) {
 
 function releaseTagFromEnvironment() {
   if (requestedTag) return requestedTag;
-  if (process.env.GITHUB_REF_NAME) return String(process.env.GITHUB_REF_NAME).trim();
   const ref = String(process.env.GITHUB_REF || '').trim();
-  return ref.startsWith('refs/tags/') ? ref.slice('refs/tags/'.length) : '';
+  if (ref.startsWith('refs/tags/')) return ref.slice('refs/tags/'.length);
+  if (process.env.GITHUB_REF_TYPE === 'tag' && process.env.GITHUB_REF_NAME) {
+    return String(process.env.GITHUB_REF_NAME).trim();
+  }
+  return '';
 }
 
 const pkg = readJson('package.json');
