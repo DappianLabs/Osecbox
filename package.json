@@ -144,7 +144,7 @@
     "cmdk": "^1.1.1",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
-    "date-fns": "^3.6.0",
+    "date-fns": "^4.4.0",
     "drizzle-kit": "^0.31.4",
     "electron": "^43.4.0",
     "electron-builder": "^26.0.12",
