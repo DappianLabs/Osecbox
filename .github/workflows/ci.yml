@@ -117,11 +117,11 @@ jobs:
 
     - name: Build Electron (Linux)
       if: matrix.target == 'linux'
-      run: npm run build:electron:linux -- --publish never
+      run: npm run build:electron:linux -- --publish=never
     
     - name: Build Electron (Windows)
       if: matrix.target == 'win'
-      run: npm run build:electron:win -- --publish never
+      run: npm run build:electron:win -- --publish=never
 
 
     - name: Audit packaged artifact

@@ -110,7 +110,7 @@ async function buildProduction() {
     console.log('\n[Step 6/6] Building Electron package...');
     const builderArgs = ['scripts/build/run-electron-builder.cjs'];
     if (targetFlag) builderArgs.push(targetFlag);
-    builderArgs.push('--publish', 'never');
+    builderArgs.push('--publish=never');
     await runCommand(process.execPath, builderArgs);
 
     // Treat the produced artifact as a test subject, not just a successful
