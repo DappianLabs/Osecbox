@@ -83,6 +83,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     env:
       BUILD_ENCRYPTION_SECRET: ${{ secrets.BUILD_ENCRYPTION_SECRET }}
+      # CI validates the same intentionally unsigned Windows packaging path as
+      # the tagged release workflow; never discover runner certificates here.
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
     
     strategy:
       matrix:
