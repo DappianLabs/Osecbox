@@ -17,7 +17,28 @@ const cachePath = process.env.ELECTRON_BUILDER_CACHE || path.join(os.tmpdir(), '
 fs.mkdirSync(cachePath, { recursive: true });
 
 const cliPath = path.join(process.cwd(), 'node_modules', 'electron-builder', 'cli.js');
-const result = spawnSync(process.execPath, [cliPath, ...process.argv.slice(2)], {
+const requestedArgs = process.argv.slice(2);
+
+// OsecBox publishes through the GitHub Actions release job, never through
+// electron-builder itself.  Keep this invariant in the wrapper rather than
+// relying on npm to forward a trailing `--publish=never` argument correctly.
+// This also prevents electron-builder from entering its GitHub publisher and
+// requiring GH_TOKEN during ordinary CI/build runs.
+const builderArgs = ['--publish=never'];
+for (let index = 0; index < requestedArgs.length; index += 1) {
+  const argument = requestedArgs[index];
+  if (argument === '--publish') {
+    // Normalize both `--publish never` and `--publish always` forms away.
+    index += 1;
+    continue;
+  }
+  if (argument === '--publish=never' || argument.startsWith('--publish=')) {
+    continue;
+  }
+  builderArgs.push(argument);
+}
+
+const result = spawnSync(process.execPath, [cliPath, ...builderArgs], {
   cwd: process.cwd(),
   env: { ...process.env, ELECTRON_BUILDER_CACHE: cachePath },
   stdio: 'inherit',
