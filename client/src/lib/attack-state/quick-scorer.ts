@@ -10,6 +10,7 @@ import type { GraphEntity } from './world-graph';
  * Quick score entity (deterministic, instant)
  */
 export function quickScore(entity: GraphEntity): number {
+  // Score path strings supplied by the engagement graph; never open/read paths.
   let score = 0;
   
   if (entity.type === 'file') {

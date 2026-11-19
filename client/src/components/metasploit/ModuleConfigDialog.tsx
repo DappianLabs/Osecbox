@@ -217,7 +217,7 @@ export function ModuleConfigDialog({ module, options, onClose, onExecute }: Modu
     onClose();
   };
 
-  // Paste from clipboard
+  // Clipboard access is only invoked by the user's paste button/shortcut; no polling.
   const handlePasteFromClipboard = async (fieldName: string) => {
     try {
       const text = await navigator.clipboard.readText();

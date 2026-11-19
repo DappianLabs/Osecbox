@@ -315,6 +315,7 @@ contextBridge.exposeInMainWorld('electron', {
   
   // Auto-updater operations
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  getUpdateState: () => ipcRenderer.invoke('get-update-state'),
   downloadUpdate: () => ipcRenderer.invoke('download-update'),
   installUpdate: () => ipcRenderer.invoke('install-update'),
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
@@ -332,10 +333,15 @@ contextBridge.exposeInMainWorld('electron', {
   decryptUltraModule: (moduleName: string) => ipcRenderer.invoke('decrypt-ultra-module', moduleName),
   
   // Listen for update events
-  onUpdateAvailable: (callback: (data: { version: string; releaseNotes: string; releaseDate: string }) => void) => {
-    const handler = (_event: any, data: { version: string; releaseNotes: string; releaseDate: string }) => callback(data);
+  onUpdateAvailable: (callback: (data: { version: string; releaseNotes: string; releaseDate?: string }) => void) => {
+    const handler = (_event: any, data: { version: string; releaseNotes: string; releaseDate?: string }) => callback(data);
     ipcRenderer.on('update-available', handler);
     return () => ipcRenderer.removeListener('update-available', handler);
+  },
+  onUpdateStateChange: (callback: (data: any) => void) => {
+    const handler = (_event: any, data: any) => callback(data);
+    ipcRenderer.on('update-state-changed', handler);
+    return () => ipcRenderer.removeListener('update-state-changed', handler);
   },
   onUpdateNotAvailable: (callback: () => void) => {
     const handler = () => callback();

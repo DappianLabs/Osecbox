@@ -61,6 +61,7 @@ const sessionHandlers = read('electron/handlers/session-handlers.ts');
 const settingsService = read('electron/services/settings-service.ts');
 const settingsStore = read('client/src/lib/settings-store.ts');
 const updateHandlers = read('electron/handlers/update-handlers.ts');
+const updateSettingsUi = read('client/src/components/views/SettingsView.tsx');
 const windowHandlers = read('electron/handlers/window-handlers.ts');
 const preload = read('electron/preload.ts');
 const ideLayout = read('client/src/components/layout/IdeLayout.tsx');
@@ -125,6 +126,13 @@ check('Provider credentials use OS storage and are excluded from desktop rendere
   settingsStore.includes('aiApiKey: \'\''),
   'AI keys remain in memory for the active provider session');
 check('Installed update checks use app.isPackaged', updateHandlers.includes('!app.isPackaged'));
+check('Updater state survives renderer startup races',
+  updateHandlers.includes("'get-update-state'") &&
+  updateHandlers.includes('update-state-changed') &&
+  preload.includes('getUpdateState') &&
+  preload.includes('onUpdateStateChange') &&
+  updateSettingsUi.includes('settings-updates'),
+  'main-process state is queryable and the Settings update controls are rendered');
 check('Custom close uses the renderer confirmation bridge',
   windowHandlers.includes("'window-confirm-close'") &&
   preload.includes("'window-confirm-close'"));

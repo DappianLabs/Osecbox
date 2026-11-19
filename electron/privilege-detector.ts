@@ -1,7 +1,25 @@
-import { exec, execSync } from 'child_process';
+import { execFile, execFileSync } from 'child_process';
+import { accessSync, constants } from 'fs';
+import { delimiter, join } from 'path';
 import { promisify } from 'util';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+
+function executableOnPath(executable: string): boolean {
+  const pathEntries = (process.env.PATH || '').split(delimiter).filter(Boolean);
+  const extensions = process.platform === 'win32'
+    ? (process.env.PATHEXT || '.EXE;.CMD;.BAT').split(';')
+    : [''];
+
+  return pathEntries.some(entry => extensions.some(extension => {
+    try {
+      accessSync(join(entry, `${executable}${extension}`), constants.X_OK);
+      return true;
+    } catch {
+      return false;
+    }
+  }));
+}
 
 export interface PrivilegeInfo {
   level: 'root' | 'sudo' | 'user' | 'admin' | 'unknown';
@@ -36,7 +54,7 @@ export class PrivilegeDetector {
     try {
       // Check if running as administrator
       // 'net session' requires admin privileges
-      await execAsync('net session', { timeout: 2000 });
+      await execFileAsync('net', ['session'], { timeout: 2000, windowsHide: true });
       
       return {
         level: 'admin',
@@ -95,21 +113,18 @@ export class PrivilegeDetector {
   private async checkSudo(): Promise<{ available: boolean; noPassword: boolean }> {
     try {
       // Check if sudo is available without password (cached credentials)
-      execSync('sudo -n true', { 
+      execFileSync('sudo', ['-n', 'true'], {
         stdio: 'ignore', 
-        timeout: 1000 
+        timeout: 1000,
+        windowsHide: true,
       });
       return { available: true, noPassword: true };
     } catch {
       // Check if sudo exists at all
       try {
-        execSync('command -v sudo', {
-          stdio: 'ignore', 
-          timeout: 1000 
-        });
-        return { available: true, noPassword: false }; // Sudo exists but needs password
+        return { available: executableOnPath('sudo'), noPassword: false };
       } catch {
-        return { available: false, noPassword: false }; // No sudo
+        return { available: false, noPassword: false };
       }
     }
   }

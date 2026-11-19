@@ -1,5 +1,10 @@
 // @ts-nocheck
 "use strict";
+// Load development credentials before settings and AI handlers are imported.
+// Never load a working-directory .env in packaged production builds.
+if (process.env.NODE_ENV === 'development') {
+    require('dotenv').config();
+}
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -833,51 +838,6 @@ electron_updater_1.autoUpdater.autoInstallOnAppQuit = true;
 // Keep updater diagnostics out of the startup console. UI events and the
 // explicit error handler below still report actionable update state.
 electron_updater_1.autoUpdater.logger = null;
-// Auto-updater event handlers
-electron_updater_1.autoUpdater.on('checking-for-update', () => {
-    console.log('[Updater] Checking for updates...');
-});
-electron_updater_1.autoUpdater.on('update-available', (info) => {
-    console.log('[Updater] Update available:', info.version);
-    safeSend('update-available', {
-        version: info.version,
-        releaseNotes: info.releaseNotes,
-        releaseDate: info.releaseDate,
-    });
-});
-electron_updater_1.autoUpdater.on('update-not-available', () => {
-    console.log('[Updater] No updates available');
-    safeSend('update-not-available');
-});
-electron_updater_1.autoUpdater.on('download-progress', (progress) => {
-    console.log(`[Updater] Download progress: ${progress.percent}%`);
-    safeSend('update-download-progress', {
-        percent: progress.percent,
-        transferred: progress.transferred,
-        total: progress.total,
-    });
-});
-electron_updater_1.autoUpdater.on('update-downloaded', (info) => {
-    console.log('[Updater] Update downloaded:', info.version);
-    safeSend('update-downloaded', {
-        version: info.version,
-    });
-});
-electron_updater_1.autoUpdater.on('error', (error) => {
-    const updaterError = error;
-    const message = updaterError.message || String(error);
-    const isUnpublishedBuild = updaterError.code === 'ERR_XML_MISSED_ELEMENT' ||
-        message.toLowerCase().includes('no published versions');
-    if (isUnpublishedBuild) {
-        console.warn('[Updater] No published release available yet');
-    }
-    else {
-        console.error('[Updater] Error:', error);
-    }
-    safeSend('update-error', {
-        message,
-    });
-});
 // Parse Metasploit search output
 // Moved to utils/parsing.ts with error handling
 // Parse Metasploit module options
@@ -1526,7 +1486,7 @@ electron_1.app.whenReady().then(async () => {
         }, 30000);
     }
     // Check for updates (deferred)
-    if (!isDev) {
+    if (!isDev && (0, update_handlers_1.isAutomaticUpdateSupported)()) {
         appTimers.autoUpdater = setTimeout(() => {
             electron_updater_1.autoUpdater.checkForUpdates().catch((error) => {
                 console.warn('[Updater] Update check skipped:', error?.message || error);
@@ -1577,7 +1537,7 @@ electron_1.app.whenReady().then(async () => {
     (0, window_handlers_1.registerWindowHandlers)(registerIPCListener, getMainWindow, async () => {
         await (0, async_timeout_1.withTimeout)(cleanupProcesses(), 2500, 'window confirm-close cleanup');
     });
-    (0, update_handlers_1.registerUpdateHandlers)(registerIPCHandler);
+    (0, update_handlers_1.registerUpdateHandlers)(registerIPCHandler, safeSend);
     (0, session_handlers_1.registerSessionHandlers)(registerIPCHandler);
     (0, tool_handlers_1.registerToolHandlers)(registerIPCHandler, getSystemInfo, terminal_handlers_1.clearTerminalPlatformCache);
     (0, subdomain_handlers_1.registerSubdomainHandlers)(registerIPCHandler);

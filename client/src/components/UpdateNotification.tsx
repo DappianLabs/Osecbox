@@ -3,27 +3,47 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Download, RefreshCw, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { useUpdateStore } from '@/lib/update-store';
+import { useUpdateStore, type UpdateStateSnapshot } from '@/lib/update-store';
 
 export function UpdateNotification() {
-  const { updateInfo, setUpdateAvailable, clearUpdate } = useUpdateStore();
+  const { updateInfo, setUpdateAvailable, setUpdateState, clearUpdate } = useUpdateStore();
   const [showNotification, setShowNotification] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [readyToInstall, setReadyToInstall] = useState(false);
 
   useEffect(() => {
-    if (!window.electron || typeof window.electron.onUpdateAvailable !== 'function') return;
+    if (!window.electron) return;
 
     const cleanups: Array<() => void> = [];
-    cleanups.push(window.electron.onUpdateAvailable((data) => {
-      setUpdateAvailable(true, { version: data.version, releaseNotes: data.releaseNotes });
-      setShowNotification(true);
-      toast.info(`Update available: v${data.version}`, {
-        description: 'A new version is ready to download',
-        duration: 10000,
-      });
-    }));
+    const applyState = (state: UpdateStateSnapshot) => {
+      setUpdateState(state);
+      setDownloading(state.status === 'downloading');
+      setDownloadProgress(state.progress?.percent || 0);
+      setReadyToInstall(state.status === 'downloaded');
+      setShowNotification(['available', 'downloading', 'downloaded'].includes(state.status));
+    };
+
+    if (typeof window.electron.getUpdateState === 'function') {
+      void window.electron.getUpdateState().then((result) => {
+        if (result?.state) applyState(result.state);
+      }).catch(() => undefined);
+    }
+
+    if (typeof window.electron.onUpdateStateChange === 'function') {
+      cleanups.push(window.electron.onUpdateStateChange(applyState));
+    }
+
+    if (typeof window.electron.onUpdateAvailable === 'function') {
+      cleanups.push(window.electron.onUpdateAvailable((data) => {
+        setUpdateAvailable(true, { version: data.version, releaseNotes: data.releaseNotes, releaseDate: data.releaseDate });
+        setShowNotification(true);
+        toast.info(`Update available: v${data.version}`, {
+          description: 'A new version is ready to download',
+          duration: 10000,
+        });
+      }));
+    }
 
     cleanups.push(window.electron.onUpdateNotAvailable(() => {
       toast.success('You\'re up to date!', {
@@ -32,6 +52,7 @@ export function UpdateNotification() {
     }));
 
     cleanups.push(window.electron.onUpdateDownloadProgress((data) => {
+      setDownloading(true);
       setDownloadProgress(data.percent);
     }));
 
@@ -46,6 +67,7 @@ export function UpdateNotification() {
 
     cleanups.push(window.electron.onUpdateError((data) => {
       setDownloading(false);
+      setReadyToInstall(false);
       toast.error('Update failed', {
         description: data.message,
       });

@@ -332,12 +332,14 @@ class SettingsService {
       exportPath: path.join(require('os').homedir(), 'osecbox-exports'),
       persistWorkspace: false,
       
-      // AI settings. Credentials are entered by the user and stored locally.
-      aiApiKey: '',
+      // AI credentials may be supplied through the ignored local .env file for
+      // development. They remain in the main process and are encrypted by
+      // saveSettings before persistence.
+      aiApiKey: process.env.CLOUDFLARE_API_KEY?.trim() || '',
       apiEndpoint: 'cloudflare',
-      selectedModel: '@cf/openai/gpt-oss-120b',
+      selectedModel: process.env.CLOUDFLARE_MODEL?.trim() || '@cf/openai/gpt-oss-120b',
       provider: 'cloudflare',
-      cloudflareAccountId: '',
+      cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID?.trim() || '',
       aiTokenLimit: 30000,
       aiContextMode: 'ultra',
       
