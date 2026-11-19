@@ -69,6 +69,26 @@ if (!unpackedDir) {
   const entries = asar.listPackage(asarPath).map(normalize);
   const entrySet = new Set(entries);
 
+  if (target === 'win') {
+    const updaterConfigPath = path.join(resourcesDir, 'app-update.yml');
+    exists('Windows updater metadata is packaged', updaterConfigPath);
+    if (fs.existsSync(updaterConfigPath)) {
+      const updaterConfig = fs.readFileSync(updaterConfigPath, 'utf8');
+      if (updaterConfig.includes('provider: github') &&
+          updaterConfig.includes('owner: DappianLabs') &&
+          updaterConfig.includes('repo: Osecbox')) {
+        pass('Windows updater metadata points to the official GitHub repository');
+      } else {
+        fail('Windows updater metadata points to the official GitHub repository');
+      }
+      if (updaterConfig.includes('publisherName:')) {
+        fail('Unsigned Windows updater metadata has no Authenticode publisher requirement');
+      } else {
+        pass('Unsigned Windows updater metadata has no Authenticode publisher requirement');
+      }
+    }
+  }
+
   for (const required of [
     'dist/electron/main.cjs',
     'dist/electron/preload.cjs',

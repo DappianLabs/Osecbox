@@ -13,6 +13,26 @@ must not be committed. The supported Node.js version is `22.13.0`.
 
 The renderer can also be run independently with `npm run dev:client`; the Express development server is available through `npm run dev`.
 
+### WSL2 development
+
+From the repository checkout in WSL2, install the Node.js version pinned by
+`.nvmrc`, then install Linux dependencies and run Electron:
+
+```sh
+bash scripts/setup/install-wsl-node.sh
+source ~/.bashrc
+npm ci
+npm run dev:electron
+```
+
+For first-run AI setup, add `CLOUDFLARE_API_KEY` and
+`CLOUDFLARE_ACCOUNT_ID` to the ignored `.env` file. Development Electron loads
+these values in the main process and uses them to prefill the Cloudflare
+Workers AI default; credentials are encrypted when settings are saved and are
+not returned to the renderer. Verify the connection in **Settings → AI → Test
+& Save**. WSL2 GUI launches also require WSLg and Electron's Ubuntu shared
+libraries (including `libnspr4`, `libnss3`, and `libasound2t64`).
+
 On Windows, [`start-electron.bat`](../start-electron.bat) is the compatibility launcher for contributors who start the project by double-clicking it. It uses `npm.cmd` explicitly, repairs a missing dependency install with `npm ci`, and launches Vite and Electron from the repository directory.
 
 ## Verification commands
@@ -74,7 +94,7 @@ git push origin v1.0.3
 
 The tag workflow builds Windows and Linux independently, runs the compatibility, dependency, package, and release-foundation audits, writes per-target checksums, verifies the downloaded build outputs, and publishes one GitHub Release. Set the repository Actions secret `BUILD_ENCRYPTION_SECRET` to a 64-character hexadecimal value before the first release. The workflow uses the automatic `GITHUB_TOKEN`; no personal token should be committed or embedded in the app.
 
-The GitHub provider configuration in `electron-builder.json` and the generated `latest.yml`/platform metadata are part of the updater contract. Keep all metadata, blockmaps, and installers from one tagged build in the same release. The installed NSIS package can use `electron-updater`; the portable Windows artifact is intentionally manual-update only. Windows updater signature verification is disabled in `electron-builder.json` because this release is intentionally unsigned.
+The GitHub provider configuration in `electron-builder.json` and the generated `latest.yml`/platform metadata are part of the updater contract. Keep all metadata, blockmaps, and installers from one tagged build in the same release. The installed NSIS package and Linux AppImage can use `electron-updater`; the portable Windows, `.deb`, and `.tar.gz` artifacts are intentionally manual-update only. The app keeps updater state in the main process and exposes a state query so a renderer that starts after an update event can still show the correct status. Windows updater signature verification is disabled in `electron-builder.json` because this release is intentionally unsigned; electron-updater still verifies the published metadata/file hash, while SmartScreen may continue to show Unknown Publisher.
 
 The release workflow requires only BUILD_ENCRYPTION_SECRET for packaging. Windows EXEs are intentionally unsigned; the workflow keeps Microsoft Defender scanning, final SHA-256 manifests, and GitHub Artifact Attestations for the final Windows and Linux distributables. Attestations do not replace Authenticode and do not prevent Windows SmartScreen or Unknown Publisher warnings. See docs/release.md for the checksum, attestation, and clean-machine acceptance checklist.
 

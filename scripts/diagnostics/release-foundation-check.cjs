@@ -111,6 +111,9 @@ const releaseWorkflow = readText('.github/workflows/release.yml');
 const gitignore = readText('.gitignore');
 const readme = readText('README.md');
 const developmentDocs = readText('docs/development.md');
+const updateHandlers = readText('electron/handlers/update-handlers.ts');
+const updateSettingsUi = readText('client/src/components/views/SettingsView.tsx');
+const preload = readText('electron/preload.ts');
 
 console.log('\nOsecBox release-foundation preflight' + (releaseMode ? ' — release gate' : ''));
 console.log('Repository root: ' + root);
@@ -150,6 +153,15 @@ check(
   (configuredRepository || 'builder repository missing'),
 );
 check('Electron entrypoint is configured', pkg && pkg.main === 'dist/electron/main.cjs');
+check(
+  'In-app updater has a recoverable state contract',
+  updateHandlers.includes("'get-update-state'") &&
+  updateHandlers.includes('update-state-changed') &&
+  preload.includes('getUpdateState') &&
+  preload.includes('onUpdateStateChange') &&
+  updateSettingsUi.includes('settings-updates'),
+  'startup event races are recoverable and Settings exposes check/download/install controls',
+);
 check('Native target guard exists', fileIsPresent('scripts/build/verify-build-target.cjs'));
 check('Package audit exists', fileIsPresent('scripts/diagnostics/packaged-artifact-audit.cjs'));
 check(

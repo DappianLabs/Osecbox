@@ -267,6 +267,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           generate_release_notes: true
+          body: |
+            ## Security checks and artifact verification
+
+            The release workflow scans Linux packages with ClamAV and Windows installers with Microsoft Defender. A successful run means both scans completed without reporting a threat. SHA-256 checksums and GitHub Artifact Attestations are provided to verify artifact integrity and build provenance.
+
+            Antivirus scans and attestations reduce risk but cannot guarantee that software is safe or malware-free. Verify the checksum and attestation before installing.
           fail_on_unmatched_files: true
           files: |
             publish/win/*

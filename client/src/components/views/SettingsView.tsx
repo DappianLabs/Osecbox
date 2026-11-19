@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { useUpdateStore } from '@/lib/update-store';
 import { useSettingsStore } from '@/lib/settings-store';
 import { WSL2StatusBadge } from '@/components/platform/WSL2StatusBadge';
@@ -19,7 +20,17 @@ interface SettingsViewProps {
 
 export function SettingsView({ scrollToSection }: SettingsViewProps = {}) {
   const { showToast } = useToast();
-  const { updateAvailable, updateInfo } = useUpdateStore();
+  const {
+    updateAvailable,
+    updateInfo,
+    status: updateState,
+    progress: updateProgress,
+    error: updateError,
+    supported: updatesSupported,
+    supportMessage: updatesSupportMessage,
+    setUpdateState,
+    clearUpdate,
+  } = useUpdateStore();
   const { settings, updateSetting: _updateSetting, updateSettings: _updateSettings, resetSettings } = useSettingsStore();
   
   // Widen types for child components that expect string-keyed settings callbacks
@@ -27,7 +38,7 @@ export function SettingsView({ scrollToSection }: SettingsViewProps = {}) {
   const updateSettings = _updateSettings as (updates: Record<string, any>) => Promise<void>;
 
   const [groqStatus, setGroqStatus] = useState({ configured: false, hasKey: false, verified: false });
-  const [appVersion, setAppVersion] = useState('1.0.0'); // Default version
+  const [appVersion, setAppVersion] = useState('Loading…');
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [updateStatus, setUpdateStatus] = useState<string>('');
   
@@ -249,26 +260,75 @@ export function SettingsView({ scrollToSection }: SettingsViewProps = {}) {
       setUpdateStatus('Updates not available in web mode');
       return;
     }
-    
+
     setCheckingUpdate(true);
     setUpdateStatus('Checking for updates...');
-    
-    const result = await window.electron.checkForUpdates();
-    setCheckingUpdate(false);
-    
-    if (result.success) {
-      if (result.updateInfo) {
-        setUpdateStatus(`Update available: v${result.updateInfo.version}`);
-        showToast('Update available!', 'success');
+
+    try {
+      const result = await window.electron.checkForUpdates();
+      if (result.state) setUpdateState(result.state);
+      if (result.success) {
+        if (result.updateInfo) {
+          setUpdateStatus(`Update available: v${result.updateInfo.version}`);
+          showToast('Update available!', 'success');
+        } else {
+          setUpdateStatus('You\'re up to date!');
+          showToast('No updates available', 'success');
+        }
       } else {
-        setUpdateStatus('You\'re up to date!');
-        showToast('No updates available', 'success');
+        setUpdateStatus(result.error || 'Failed to check for updates');
+        showToast(result.error || 'Update check failed', 'error');
       }
-    } else {
-      setUpdateStatus('Failed to check for updates');
-      showToast(result.error || 'Update check failed', 'error');
+    } catch (error: any) {
+      const message = error?.message || 'Update check failed';
+      setUpdateStatus(message);
+      showToast(message, 'error');
+    } finally {
+      setCheckingUpdate(false);
     }
   };
+
+  const handleDownloadUpdate = async () => {
+    if (!window.electron?.downloadUpdate) return;
+    try {
+      const result = await window.electron.downloadUpdate();
+      if (result.state) setUpdateState(result.state);
+      if (!result.success) {
+        showToast(result.error || 'The update could not be downloaded', 'error');
+      }
+    } catch (error: any) {
+      showToast(error?.message || 'The update could not be downloaded', 'error');
+    }
+  };
+
+  const handleInstallUpdate = async () => {
+    if (!window.electron?.installUpdate) return;
+    try {
+      const result = await window.electron.installUpdate();
+      if (result.state) setUpdateState(result.state);
+      if (result.success) {
+        clearUpdate();
+      } else {
+        showToast(result.error || 'The update could not be installed', 'error');
+      }
+    } catch (error: any) {
+      showToast(error?.message || 'The update could not be installed', 'error');
+    }
+  };
+
+  const updateStatusLabel = updateState === 'downloaded'
+    ? 'Ready to restart'
+    : updateState === 'downloading'
+      ? `Downloading ${Math.round(updateProgress?.percent || 0)}%`
+      : updateState === 'checking'
+        ? 'Checking…'
+        : updateState === 'up-to-date'
+          ? 'Up to date'
+          : updateState === 'error'
+            ? 'Update check failed'
+            : updateAvailable && updateInfo
+              ? `Update available: v${updateInfo.version}`
+              : 'Ready to check';
 
   return (
     <div 
@@ -301,6 +361,79 @@ export function SettingsView({ scrollToSection }: SettingsViewProps = {}) {
           groqStatus={groqStatus}
           onSaveGroqKey={handleSaveGroqKey}
         />
+
+        <Separator className="my-8" />
+
+        {/* Application updates */}
+        <section id="settings-updates" className="mb-8 scroll-mt-8">
+          <div className="flex items-center gap-3 mb-4 pb-3 border-b-2 border-blue-500/30">
+            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <Download className="w-5 h-5 text-blue-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Application Updates</h2>
+              <p className="text-xs text-muted-foreground">Check the official OsecBox GitHub Release feed and manage updates</p>
+            </div>
+          </div>
+          <div className="win7-panel p-6 space-y-4 bg-card/50 border-2 border-border/80 shadow-xl rounded-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Installed version: v{appVersion}</p>
+                <p className="text-xs text-muted-foreground mt-1">{updateStatusLabel}</p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={handleCheckForUpdates}
+                disabled={checkingUpdate || !updatesSupported}
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${checkingUpdate ? 'animate-spin' : ''}`} />
+                {checkingUpdate ? 'Checking…' : 'Check for Updates'}
+              </Button>
+            </div>
+
+            {updateInfo && (
+              <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-4 space-y-3">
+                <div>
+                  <p className="text-sm font-semibold text-blue-300">Version {updateInfo.version} is available</p>
+                  {updateInfo.releaseNotes && (
+                    <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap line-clamp-4">{updateInfo.releaseNotes}</p>
+                  )}
+                </div>
+                {updateState === 'downloading' && (
+                  <div>
+                    <Progress value={updateProgress?.percent || 0} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">Downloading… {Math.round(updateProgress?.percent || 0)}%</p>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  {updateState === 'downloaded' ? (
+                    <Button onClick={handleInstallUpdate} size="sm">
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Restart & Install
+                    </Button>
+                  ) : (
+                    <Button onClick={handleDownloadUpdate} disabled={updateState === 'downloading'} size="sm">
+                      <Download className="w-4 h-4 mr-2" />
+                      {updateState === 'downloading' ? 'Downloading…' : 'Download Update'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {!updatesSupported && updatesSupportMessage && (
+              <p className="text-xs text-muted-foreground rounded-lg border border-border/70 bg-muted/20 p-3">{updatesSupportMessage}</p>
+            )}
+            {(updateError || updateStatus) && (
+              <p className={`text-xs rounded-lg border p-3 ${updateError ? 'border-red-500/30 text-red-300 bg-red-500/5' : 'border-border/70 text-muted-foreground bg-muted/20'}`}>
+                {updateError || updateStatus}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Updates come from the official GitHub Releases feed. Windows EXEs are unsigned, so SmartScreen may show an Unknown Publisher warning. Verify the release SHA-256 manifest before running a manually downloaded file; GitHub Artifact Attestations provide build provenance, not SmartScreen trust.
+            </p>
+          </div>
+        </section>
 
         <Separator className="my-8" />
 

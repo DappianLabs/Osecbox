@@ -41,6 +41,8 @@ export function createHost(id: string, ip: string, role: HostRole = 'target'): H
 }
 
 function initializeFilesystemTargets() {
+  // These are paths to prioritize on an authorized remote engagement target.
+  // This list is metadata only; it does not read the local user's filesystem.
   return [
     { path: '/etc/shadow', priority: 10 },
     { path: '/etc/passwd', priority: 9 },

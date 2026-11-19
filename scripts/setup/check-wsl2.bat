@@ -6,6 +6,7 @@ set "OSECBOX_REPO_ROOT=%~dp0..\.."
 
 where wsl.exe >nul 2>&1
 if errorlevel 1 (
+    rem Print setup guidance only; this preflight never installs WSL or starts a download.
     echo WSL is not installed or wsl.exe is not on PATH.
     echo Install it from an elevated PowerShell window with:
     echo   wsl --install -d Ubuntu

@@ -227,13 +227,33 @@ export interface IElectronAPI {
   onMsfComplete: (callback: (data: { sessionId: string; code: number }) => void) => () => void;
   
   // Auto-updater
+  getUpdateState: () => Promise<{
+    success: boolean;
+    state?: {
+      status: 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'up-to-date' | 'error';
+      updateInfo: { version: string; releaseNotes: string; releaseDate?: string } | null;
+      progress: { percent: number; transferred: number; total: number } | null;
+      error: string | null;
+      supported: boolean;
+      supportMessage: string | null;
+    };
+    error?: string;
+  }>;
   checkForUpdates: () => Promise<{ 
     success: boolean; 
-    updateInfo?: { version: string; releaseDate: string; releaseNotes: string }; 
+    updateInfo?: { version: string; releaseDate?: string; releaseNotes: string };
+    state?: {
+      status: 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'up-to-date' | 'error';
+      updateInfo: { version: string; releaseNotes: string; releaseDate?: string } | null;
+      progress: { percent: number; transferred: number; total: number } | null;
+      error: string | null;
+      supported: boolean;
+      supportMessage: string | null;
+    };
     error?: string 
   }>;
-  downloadUpdate: () => Promise<{ success: boolean; error?: string }>;
-  installUpdate: () => Promise<{ success: boolean; error?: string }>;
+  downloadUpdate: () => Promise<{ success: boolean; error?: string; state?: any }>;
+  installUpdate: () => Promise<{ success: boolean; error?: string; state?: any }>;
   getAppVersion: () => Promise<{ version: string }>;
 
   // License management
@@ -251,7 +271,15 @@ export interface IElectronAPI {
   // Generic invoke method for IPC health monitoring
   invoke: (channel: string, ...args: any[]) => Promise<any>;
   
-  onUpdateAvailable: (callback: (data: { version: string; releaseNotes: string; releaseDate: string }) => void) => () => void;
+  onUpdateAvailable: (callback: (data: { version: string; releaseNotes: string; releaseDate?: string }) => void) => () => void;
+  onUpdateStateChange: (callback: (data: {
+    status: 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'up-to-date' | 'error';
+    updateInfo: { version: string; releaseNotes: string; releaseDate?: string } | null;
+    progress: { percent: number; transferred: number; total: number } | null;
+    error: string | null;
+    supported: boolean;
+    supportMessage: string | null;
+  }) => void) => () => void;
   onUpdateNotAvailable: (callback: () => void) => () => void;
   onUpdateDownloadProgress: (callback: (data: { percent: number; transferred: number; total: number }) => void) => () => void;
   onUpdateDownloaded: (callback: (data: { version: string }) => void) => () => void;

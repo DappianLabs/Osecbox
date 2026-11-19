@@ -4,6 +4,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.0.3-7c3aed?style=flat-square)](https://github.com/DappianLabs/Osecbox/releases)
 [![Platforms](https://img.shields.io/badge/releases-Windows%20x64%20%7C%20Linux%20x64-2563eb?style=flat-square)](https://github.com/DappianLabs/Osecbox/releases)
+[![Website](https://img.shields.io/badge/website-osecbox.sbs-7c3aed?style=flat-square)](https://osecbox.sbs/)
 [![License](https://img.shields.io/badge/license-MIT-16a34a?style=flat-square)](LICENSE)
 
 ![OsecBox Nmap workspace with scan configuration, live terminal output, and parsed results](client/public/images/readme/scanners-nmap.webp)
@@ -135,6 +136,10 @@ For vulnerability reporting and release-verification guidance, see [SECURITY.md]
 Releases are published on [GitHub Releases](https://github.com/DappianLabs/Osecbox/releases). Current releases cover Windows x64 and Linux x64. Maintainer-only signing, packaging, checksum, and release procedures are intentionally kept in [the release guide](docs/release.md), not in this product overview.
 
 Windows release artifacts are intentionally released without a commercial Authenticode certificate. Published releases include SHA-256 checksums and GitHub Artifact Attestations for integrity verification and build provenance; Windows SmartScreen may still show an Unknown Publisher warning.
+
+The tagged release workflow scans Linux packages with ClamAV and Windows installers with Microsoft Defender. A successful release run means those scans completed without reporting a threat; it does not guarantee that software is safe or malware-free. Verify the artifact checksum and GitHub attestation before installing. See the [release workflow](https://github.com/DappianLabs/Osecbox/actions/workflows/release.yml) for scan status and the [latest release](https://github.com/DappianLabs/Osecbox/releases/latest) for downloads and verification files.
+
+For a manual download, use the official GitHub Release page, download `SHA256SUMS.txt`, and compare the artifact hash before launching it. On Windows PowerShell, run `Get-FileHash .\\OsecBox-<version>-x64-Setup.exe -Algorithm SHA256` and compare the result with the matching line in `SHA256SUMS.txt`. The in-app updater is available for installed NSIS Windows builds and Linux AppImage builds; portable Windows, `.deb`, and `.tar.gz` downloads are updated manually from GitHub Releases.
 
 ## Documentation
 
